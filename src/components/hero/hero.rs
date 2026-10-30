@@ -2,8 +2,16 @@ use dioxus::prelude::*;
 
 use crate::components::DownloadButtons;
 
+const DEMO_MODEL: Asset = asset!("/assets/model/demo.glb");
+
 #[component]
 pub fn Hero() -> Element {
+    // Boot the 3D avatar renderer once the canvas is mounted (client only).
+    use_effect(move || {
+        #[cfg(target_arch = "wasm32")]
+        vrm::start_or_inject();
+    });
+
     rsx! {
         section {
             class: "relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden",
@@ -38,59 +46,331 @@ pub fn Hero() -> Element {
 
                 // Right: Hero Graphic
                 div {
-                    class: "relative w-full h-[420px] sm:h-[500px] flex items-center justify-center z-10 reveal active lg:justify-end",
+                    class: "relative w-full h-[480px] sm:h-[560px] flex items-center justify-center z-10 reveal active lg:justify-end",
                     div {
-                        class: "relative w-full max-w-[450px] h-[380px] sm:h-[450px] glass-panel rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center border-t border-l border-white/20 shadow-2xl",
-                        div {
-                            class: "absolute top-4 left-4 flex gap-2",
-                            div { class: "w-3 h-3 rounded-full bg-red-500/80" }
-                            div { class: "w-3 h-3 rounded-full bg-yellow-500/80" }
-                            div { class: "w-3 h-3 rounded-full bg-green-500/80" }
-                        }
-                        div { class: "absolute top-4 right-4 text-xs font-mono text-gray-500", "COMPANION.EXE_ACTIVE" }
+                        class: "relative w-full max-w-[540px] h-[440px] sm:h-[540px] p-6 sm:p-8 flex flex-col items-center justify-center",
 
+                        // Live 3D avatar
                         div {
-                            class: "relative w-48 h-48 sm:w-64 sm:h-64 animate-float mt-4",
-                            div {
-                                class: "absolute inset-0 rounded-full border border-purple-500/30 animate-spin-slow shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]",
-                                div { class: "absolute top-0 left-1/2 w-2 h-2 bg-purple-400 rounded-full blur-[1px]" }
+                            class: "relative w-full flex-1 min-h-0 mt-2",
+                            canvas {
+                                id: "hero-vrm-canvas",
+                                class: "absolute inset-0 h-full w-full",
                             }
                             div {
-                                class: "absolute inset-6 rounded-full border border-blue-500/40 animate-spin-slow-reverse",
-                                div { class: "absolute bottom-0 right-1/4 w-3 h-3 bg-blue-400 rounded-full blur-[2px]" }
+                                id: "hero-vrm-loading",
+                                class: "absolute inset-0 flex items-center justify-center",
+                                span { class: "text-xs text-gray-500 tracking-widest uppercase animate-pulse", "Loading avatar..." }
                             }
-                            div { class: "absolute inset-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 animate-pulse-glow z-0" }
                             div {
-                                class: "absolute inset-16 rounded-full bg-gradient-to-tr from-indigo-900 via-purple-500 to-blue-300 shadow-[0_0_40px_rgba(168,85,247,0.8)] z-10 flex items-center justify-center overflow-hidden border border-white/30",
-                                div { class: "absolute top-2 left-4 w-12 h-6 bg-white/30 rounded-full rotate-[-45deg] blur-[2px]" }
-                                i { class: "fa-solid fa-robot text-3xl sm:text-4xl text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" }
+                                id: "hero-vrm-fallback",
+                                class: "absolute inset-0 hidden items-center justify-center",
+                                i { class: "fa-solid fa-robot text-5xl text-white/80" }
                             }
-                        }
-
-                        div {
-                            class: "mt-8 sm:mt-12 flex items-end justify-center gap-1 h-8",
-                            div { class: "w-1.5 bg-purple-500 rounded-t-sm h-full animate-[ping_1s_ease-in-out_infinite]" }
-                            div { class: "w-1.5 bg-blue-500 rounded-t-sm h-3/4 animate-[ping_1.2s_ease-in-out_infinite_0.1s]" }
-                            div { class: "w-1.5 bg-purple-400 rounded-t-sm h-1/2 animate-[ping_0.8s_ease-in-out_infinite_0.2s]" }
-                            div { class: "w-1.5 bg-blue-400 rounded-t-sm h-full animate-[ping_1.1s_ease-in-out_infinite_0.3s]" }
-                            div { class: "w-1.5 bg-purple-500 rounded-t-sm h-2/3 animate-[ping_0.9s_ease-in-out_infinite_0.4s]" }
-                        }
-                        p { class: "text-xs text-gray-400 mt-3 tracking-widest uppercase", "Listening..." }
-                    }
-
-                    div {
-                        class: "absolute -right-6 top-1/4 glass-card p-3 rounded-xl flex items-center gap-3 animate-float-delayed z-20 hidden md:flex",
-                        div {
-                            class: "w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400",
-                            i { class: "fa-solid fa-check" }
-                        }
-                        div {
-                            p { class: "text-xs font-semibold text-white", "Transparent Overlay" }
-                            p { class: "text-[10px] text-gray-400", "Frameless, always-on-top" }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+// Three.js + @pixiv/three-vrm loader, only compiled into the wasm client.
+// The libraries come from CDN via an importmap; the module auto-starts on the
+// current canvas and stays reachable as window.__startHeroVrm so remounts of
+// the hero (route changes) can re-attach a fresh canvas.
+#[cfg(target_arch = "wasm32")]
+mod vrm {
+    use wasm_bindgen::prelude::*;
+
+    // Generated by build.rs: one hashed asset URL per .vrma file found in
+    // assets/vrma/ at compile time.
+    include!(concat!(env!("OUT_DIR"), "/vrma_list.rs"));
+
+    const IMPORTMAP: &str = r#"{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js","@pixiv/three-vrm-animation":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm-animation@3/lib/three-vrm-animation.module.min.js"}}"#;
+
+    const MODULE_JS: &str = r#"
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
+import { VRMAnimationLoaderPlugin, createVRMAnimationClip } from '@pixiv/three-vrm-animation';
+
+const MODEL_URL = '__MODEL_URL__';
+const VRMA_URLS = __VRMA_URLS__;
+
+async function start(canvas) {
+  if (!canvas || canvas.dataset.vrmActive === '1') return;
+  canvas.dataset.vrmActive = '1';
+  const loading = document.getElementById('hero-vrm-loading');
+  const fallback = document.getElementById('hero-vrm-fallback');
+  if (loading) loading.style.display = 'flex';
+  canvas.style.display = '';
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  } catch (e) {
+    canvas.style.display = 'none';
+    if (loading) loading.style.display = 'none';
+    if (fallback) fallback.style.display = 'flex';
+    return;
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x000000, 0);
+  if (window.__stopHeroVrm) { try { window.__stopHeroVrm(); } catch (e) {} }
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x3b3b58, 1.15));
+  const dir = new THREE.DirectionalLight(0xffffff, 1.5);
+  dir.position.set(1.5, 3, 2.5);
+  scene.add(dir);
+  const rim = new THREE.PointLight(0xa855f7, 8, 12);
+  rim.position.set(-2, 1.5, -2.5);
+  scene.add(rim);
+
+  let vrm = null;
+  let model = null;
+  let mixer = null;
+
+  // Drop the arms into a relaxed A-pose right after load so the avatar is
+  // never seen in the VRM's default T-pose while (or if) the idle clip loads;
+  // once the clip's action plays, the mixer overrides these rotations. Which
+  // Z-sign swings an arm down depends on how the model sits in its normalized
+  // rig (VRM0 and VRM1 face opposite ways), so probe one arm first.
+  const restPose = (vrm) => {
+    if (!vrm || !vrm.humanoid) return;
+    const h = vrm.humanoid;
+    const bone = (name) => h.getNormalizedBoneNode(name);
+    const leftArm = bone('leftUpperArm');
+    const rightArm = bone('rightUpperArm');
+    if (!leftArm || !rightArm) return;
+    const restY = leftArm.getWorldPosition(new THREE.Vector3()).y;
+    leftArm.rotation.set(0, 0, Math.PI / 2);
+    h.update();
+    const probeHand = bone('leftHand') || bone('leftLowerArm');
+    const probeY = probeHand ? probeHand.getWorldPosition(new THREE.Vector3()).y : null;
+    leftArm.rotation.set(0, 0, 0);
+    // Probe swung the hand up => this rig's left arm points along -X; flip.
+    const flip = probeY !== null && probeY > restY ? -1 : 1;
+    const drop = flip * THREE.MathUtils.degToRad(65);
+    leftArm.rotation.set(0, 0, drop);
+    rightArm.rotation.set(0, 0, -drop);
+    // Elbow bend: same signs either way (forearm and "forward" flip together).
+    const leftFore = bone('leftLowerArm');
+    const rightFore = bone('rightLowerArm');
+    if (leftFore) leftFore.rotation.set(0, -0.25, 0);
+    if (rightFore) rightFore.rotation.set(0, 0.25, 0);
+    h.update();
+  };
+
+  // Playlist: preload every clip from the build-time-generated /assets/vrma/
+  // list and play them one by one in random order. As each clip finishes it
+  // crossfades straight into the next, so the avatar dances endlessly with no
+  // pauses; the very first clip fades in from the rest pose. Failures are
+  // skipped; with no usable clips the avatar simply stays relaxed. Status
+  // lands on window.__vrmaStatus / __vrmaClipCount.
+  let clips = []; // { url, clip }
+  let current = null;
+  let currentUrl = null;
+  const FADE = 0.8;
+
+  const playRandomClip = () => {
+    if (!clips.length || !vrm || !mixer) return;
+    let pick = clips[Math.floor(Math.random() * clips.length)];
+    if (clips.length > 1) {
+      while (pick.url === currentUrl) pick = clips[Math.floor(Math.random() * clips.length)];
+    }
+    currentUrl = pick.url;
+    if (current) {
+      const old = current;
+      old.fadeOut(FADE); // crossfade out while the next clip fades in
+      setTimeout(() => old.stop(), FADE * 1000 + 100);
+    }
+    // A brand-new action per play: clipAction would hand back the same cached
+    // object when a clip replays, and play() on an exhausted action doesn't
+    // rewind it — it re-finishes instantly and the avatar freezes.
+    current = new THREE.AnimationAction(mixer, pick.clip, vrm.scene);
+    current.setLoop(THREE.LoopOnce, 1);
+    current.clampWhenFinished = true;
+    current.play();
+    current.fadeIn(FADE); // blends in from the rest pose (first clip) or the previous clip's last pose
+    window.__vrmaStatus = 'playing: ' + currentUrl.split('/').pop();
+  };
+
+  window.__heroVrmTick = () => {}; // kept as a no-op; inter-clip pauses were removed
+
+  const loadVrmas = () => {
+    if (!vrm) return;
+    if (!VRMA_URLS.length) {
+      window.__vrmaStatus = 'no-vrma-files';
+      return;
+    }
+    if (!mixer) {
+      mixer = new THREE.AnimationMixer(vrm.scene);
+      mixer.addEventListener('finished', () => {
+        // Crossfade straight into the next random clip; playRandomClip fades
+        // the finished action out underneath, so the avatar keeps dancing.
+        playRandomClip();
+      });
+      window.__heroVrmMixer = mixer;
+    }
+    let done = 0;
+    const oneDone = () => {
+      done += 1;
+      window.__vrmaStatus = 'preloading ' + done + '/' + VRMA_URLS.length;
+      if (done !== VRMA_URLS.length) return;
+      if (!clips.length) {
+        window.__vrmaStatus = 'no-usable-clips';
+        return;
+      }
+      window.__vrmaClipCount = clips.length;
+      playRandomClip();
+    };
+    VRMA_URLS.forEach((url) => {
+      const animLoader = new GLTFLoader();
+      animLoader.register((parser) => new VRMAnimationLoaderPlugin());
+      animLoader.load(
+        url,
+        (gltfAnim) => {
+          try {
+            const anim = gltfAnim.userData.vrmAnimations && gltfAnim.userData.vrmAnimations[0];
+            if (anim) clips.push({ url, clip: createVRMAnimationClip(anim, vrm) });
+          } catch (e) {}
+          oneDone();
+        },
+        undefined,
+        () => oneDone()
+      );
+    });
+  };
+
+  // Frame the model so the whole performance stays inside the canvas: fit the
+  // T-pose height with extra margin for limbs that travel beyond it (hands
+  // overhead, hips travel), and budget width at 85% of height — dance clips
+  // spread the legs and swing the arms but never reach the full T-pose
+  // arm-span, which would needlessly shrink the avatar on portrait canvases.
+  let frameData = null;
+  const frame = () => {
+    if (!frameData) return;
+    const { size, center } = frameData;
+    const halfFov = (camera.fov * Math.PI) / 360;
+    const width = Math.min(Math.max(size.x, size.z), size.y * 0.85);
+    const distH = (size.y / 2) / Math.tan(halfFov);
+    const distW = (width / 2) / (Math.tan(halfFov) * camera.aspect);
+    const dist = Math.max(distH, distW) * 1.25;
+    camera.position.set(center.x, center.y + size.y * 0.05, center.z + dist);
+    camera.lookAt(center.x, center.y, center.z);
+  };
+
+  new GLTFLoader()
+    .register((parser) => new VRMLoaderPlugin(parser))
+    .load(
+      MODEL_URL,
+      (gltf) => {
+        vrm = gltf.userData.vrm || null;
+        model = vrm ? vrm.scene : gltf.scene;
+        model.traverse((o) => { o.frustumCulled = false; });
+        if (vrm) {
+          VRMUtils.rotateVRM0(vrm);
+          vrm.scene.rotation.y = Math.PI;
+        }
+        scene.add(model);
+        // Capture the T-pose bounds before posing: the height anchors framing,
+        // and frame() adds margin plus a width budget for animated limbs.
+        const box = new THREE.Box3().setFromObject(model);
+        frameData = { size: box.getSize(new THREE.Vector3()), center: box.getCenter(new THREE.Vector3()) };
+        restPose(vrm);
+        frame();
+        if (loading) loading.style.display = 'none';
+        loadVrmas();
+      },
+      undefined,
+      () => {
+        if (loading) loading.style.display = 'none';
+        canvas.style.display = 'none';
+        if (fallback) fallback.style.display = 'flex';
+      }
+    );
+
+  const resize = () => {
+    const w = canvas.clientWidth || 1;
+    const h = canvas.clientHeight || 1;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    frame();
+  };
+  resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
+
+  const clock = new THREE.Clock();
+  renderer.setAnimationLoop(() => {
+    const delta = clock.getDelta();
+    if (mixer) mixer.update(delta);
+    if (vrm) vrm.update(delta);
+    renderer.render(scene, camera);
+  });
+  window.__stopHeroVrm = () => renderer.setAnimationLoop(null);
+}
+
+window.__startHeroVrm = (canvas) => start(canvas);
+
+const existing = document.getElementById('hero-vrm-canvas');
+if (existing) window.__startHeroVrm(existing);
+"#;
+
+    pub fn start_or_inject() {
+        let Some(window) = web_sys::window() else {
+            return;
+        };
+        let Some(doc) = window.document() else { return };
+        let Some(head) = doc.head() else { return };
+
+        if doc.get_element_by_id("hero-vrm-importmap").is_none() {
+            if let Ok(el) = doc.create_element("script") {
+                let _ = el.set_id("hero-vrm-importmap");
+                let _ = el.set_attribute("type", "importmap");
+                el.set_text_content(Some(IMPORTMAP));
+                let _ = head.append_child(&el);
+            }
+        }
+
+        // Module already installed? Point it at the current canvas (remount case).
+        if let Ok(starter) = js_sys::Reflect::get(&window, &JsValue::from_str("__startHeroVrm")) {
+            if starter.is_function() {
+                if let Some(canvas) = doc.get_element_by_id("hero-vrm-canvas") {
+                    let f = js_sys::Function::from(starter);
+                    let _ = f.call1(&window, &canvas);
+                }
+                return;
+            }
+        }
+
+        if doc.get_element_by_id("hero-vrm-module").is_some() {
+            return; // still loading; it auto-starts on the current canvas
+        }
+
+        let model_url = super::DEMO_MODEL.to_string();
+        // The clip list is generated by build.rs (one hashed asset!() URL per
+        // .vrma file in assets/vrma/) and baked into the module as JSON.
+        let vrma_json = format!(
+            "[{}]",
+            vrma_url_list()
+                .iter()
+                .map(|u| format!("\"{u}\""))
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        if let Ok(el) = doc.create_element("script") {
+            let _ = el.set_id("hero-vrm-module");
+            let _ = el.set_attribute("type", "module");
+            el.set_text_content(Some(
+                &MODULE_JS
+                    .replace("__MODEL_URL__", &model_url)
+                    .replace("__VRMA_URLS__", &vrma_json),
+            ));
+            let _ = head.append_child(&el);
         }
     }
 }
