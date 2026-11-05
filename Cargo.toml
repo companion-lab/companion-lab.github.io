@@ -7,19 +7,62 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dioxus = { version = "0.7.10", features = ["router", "fullstack"] }
+# `fullstack` is enabled by the `server` feature (not unconditionally): a
+# fullstack client expects server-rendered hydration data and crashes with
+# `atob(undefined)` on the static Pages deployment.
+dioxus = { version = "0.7.10", features = ["router"] }
+
+# Docs pages: parse the embedded markdown articles. Pure Rust, so it builds
+# for the static wasm client too (no server round-trip needed).
+pulldown-cmark = { version = "0.13", default-features = false }
+serde = { version = "1", features = ["derive"] }
+
+# Server-only deps for the build-upload API (enabled by the `server` feature).
+# They are target-gated so the wasm client build — even one built with
+# `--features server` — never compiles the native storage stack.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+anyhow = { version = "1", optional = true }
+aws-config = { version = "1", optional = true }
+aws-sdk-s3 = { version = "1", optional = true }
+hex = { version = "0.4", optional = true }
+sha2 = { version = "0.10", optional = true }
+sqlx = { version = "0.8", optional = true, default-features = false, features = [
+    "runtime-tokio",
+    "tls-rustls",
+    "macros",
+    "postgres",
+    "migrate",
+] }
+tempfile = { version = "3", optional = true }
+tokio = { version = "1", optional = true, features = ["fs", "io-util"] }
+tracing = { version = "0.1", optional = true }
 
 [features]
 default = ["web"]
 web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
 mobile = ["dioxus/mobile"]
-server = ["dioxus/server"]
+server = [
+    "dioxus/server",
+    "dioxus/fullstack",
+    "dep:anyhow",
+    "dep:aws-config",
+    "dep:aws-sdk-s3",
+    "dep:hex",
+    "dep:sha2",
+    "dep:sqlx",
+    "dep:tempfile",
+    "dep:tokio",
+    "dep:tracing",
+]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { version = "0.3", features = [
     "Window",
     "Navigator",
+    "Clipboard",
+    "ScrollIntoViewOptions",
+    "ScrollBehavior",
     "Document",
     "Element",
     "Node",

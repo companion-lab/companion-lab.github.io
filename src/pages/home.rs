@@ -1,20 +1,39 @@
 use dioxus::prelude::*;
 
-use crate::components::{Cta, Features, Footer, Hero, Specs};
+use crate::components::{
+    AmbientBackground, Cta, Features, Footer, Hero, Specs, SECTION_SCROLL_TARGET, scroll_to_id,
+};
 
 /// Home page
 #[component]
 pub fn Home() -> Element {
-    rsx! {
-        // Ambient Background Lighting (clipped to the viewport so the blobs
-        // can never widen the page and enable horizontal scrolling)
-        div {
-            class: "fixed inset-0 overflow-hidden pointer-events-none",
-            div { class: "bg-blob bg-purple-600/30 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] top-[-100px] left-[-100px]" }
-            div { class: "bg-blob bg-blue-600/20 w-[350px] h-[350px] sm:w-[600px] sm:h-[600px] top-[20%] right-[-150px] sm:right-[-200px]" }
-            div { class: "bg-blob bg-indigo-600/20 w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] bottom-[10%] left-[10%]" }
+    // Scroll to a section requested from another page (navbar/footer links)
+    // or re-requested while already here. The tracked read subscribes the
+    // effect to the signal; `take` clears it in the same step so the effect
+    // settles after one extra run instead of looping.
+    use_effect(move || {
+        let target = SECTION_SCROLL_TARGET();
+        if target.is_some() {
+            SECTION_SCROLL_TARGET.with_mut(|target| target.take());
+            scroll_to_id(target.unwrap());
         }
+    });
 
+    // Honor `#section` URLs on first load: the browser's own hash scroll runs
+    // before the WASM app has rendered anything, so it needs a second try.
+    use_effect(move || {
+        #[cfg(target_arch = "wasm32")]
+        if let Some(window) = web_sys::window() {
+            if let Ok(hash) = window.location().hash() {
+                if hash.len() > 1 {
+                    scroll_to_id(&hash[1..]);
+                }
+            }
+        }
+    });
+
+    rsx! {
+        AmbientBackground {}
         Hero {}
         Features {}
         Specs {}

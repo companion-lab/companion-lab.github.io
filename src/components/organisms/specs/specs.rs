@@ -1,5 +1,17 @@
 use dioxus::prelude::*;
 
+use crate::components::molecules::SpecRow;
+
+const SPECS: [(&str, &str); 7] = [
+    ("Desktop Shell", "Tauri v2 (Rust)"),
+    ("3D Rendering", "Three.js + three-vrm 3.5"),
+    ("STT", "Moonshine Voice (on-device)"),
+    ("TTS", "Supertonic-3 ONNX"),
+    ("MCP", "rmcp (Rust SDK)"),
+    ("Providers", "OpenAI-compat / Anthropic / Gemini"),
+    ("Frontend", "React + TypeScript"),
+];
+
 #[component]
 pub fn Specs() -> Element {
     rsx! {
@@ -36,14 +48,10 @@ pub fn Specs() -> Element {
                                 "Technical Specifications"
                             }
                             ul {
-                                class: "space-y-4",
-                                li { class: "flex flex-col gap-1 py-3 border-b border-white/5 sm:flex-row sm:items-center sm:justify-between", span { class: "text-gray-400", "Desktop Shell" } span { class: "font-medium text-white sm:text-right", "Tauri v2 (Rust)" } }
-                                li { class: "flex flex-col gap-1 py-3 border-b border-white/5 sm:flex-row sm:items-center sm:justify-between", span { class: "text-gray-400", "3D Rendering" } span { class: "font-medium text-white sm:text-right", "Three.js + three-vrm 3.5" } }
-                                li { class: "flex flex-col gap-1 py-3 border-b border-white/5 sm:flex-row sm:items-center sm:justify-between", span { class: "text-gray-400", "STT" } span { class: "font-medium text-white sm:text-right", "Moonshine Voice (on-device)" } }
-                                li { class: "flex flex-col gap-1 py-3 border-b border-white/5 sm:flex-row sm:items-center sm:justify-between", span { class: "text-gray-400", "TTS" } span { class: "font-medium text-white sm:text-right", "Supertonic-3 ONNX" } }
-                                li { class: "flex flex-col gap-1 py-3 border-b border-white/5 sm:flex-row sm:items-center sm:justify-between", span { class: "text-gray-400", "MCP" } span { class: "font-medium text-white sm:text-right", "rmcp (Rust SDK)" } }
-                                li { class: "flex flex-col gap-1 py-3 border-b border-white/5 sm:flex-row sm:items-center sm:justify-between", span { class: "text-gray-400", "Providers" } span { class: "font-medium text-white sm:text-right", "OpenAI-compat / Anthropic / Gemini" } }
-                                li { class: "flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between", span { class: "text-gray-400", "Frontend" } span { class: "font-medium text-white sm:text-right", "React + TypeScript" } }
+                                class: "space-y-4 divide-y divide-white/5",
+                                for (label, value) in SPECS {
+                                    SpecRow { label, value }
+                                }
                             }
                         }
                     }

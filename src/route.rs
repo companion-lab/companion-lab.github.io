@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::Navbar,
-    pages::{Home, NotFound},
+    pages::{Docs, DocsArticle, Home, NotFound},
 };
 
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -11,6 +11,12 @@ pub enum Route {
     #[layout(Navbar)]
     #[route("/")]
     Home {},
+
+    #[route("/docs")]
+    Docs {},
+
+    #[route("/docs/:slug")]
+    DocsArticle { slug: String },
 
     #[route("/:..segments")]
     NotFound { segments: Vec<String> },

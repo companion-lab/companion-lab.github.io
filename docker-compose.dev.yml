@@ -1,0 +1,53 @@
+# Local dev dependencies for the build-upload API (Postgres + RustFS as S3).
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# Then start the site with these env vars:
+#   export DATABASE_URL=postgres://companion:companion@localhost:5433/companion_builds
+#   export UPLOAD_TOKEN=dev-token
+#   export S3_BUCKET=companion-builds
+#   export AWS_ACCESS_KEY_ID=companion
+#   export AWS_SECRET_ACCESS_KEY=companion-secret
+#   export AWS_ENDPOINT_URL=http://localhost:8333
+#   export AWS_REGION=us-east-1
+#
+# The S3 API is mapped to host port 8333 because 9000/9001 are taken by another
+# project's RustFS container. The app creates the bucket automatically when it
+# is missing. The web console is at http://localhost:8334.
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: companion
+      POSTGRES_PASSWORD: companion
+      POSTGRES_DB: companion_builds
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U companion -d companion_builds"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  s3:
+    image: rustfs/rustfs
+    environment:
+      RUSTFS_ACCESS_KEY: companion
+      RUSTFS_SECRET_KEY: companion-secret
+    ports:
+      - "8333:9000"
+      - "8334:9001"
+    volumes:
+      - s3data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  s3data:

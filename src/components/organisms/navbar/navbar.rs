@@ -1,11 +1,20 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{DiscordButton, GithubButton},
+    components::atoms::{IconButton, NavLink, NavLinkVariant},
     route::Route,
 };
 
 const LOGO_IMAGE: Asset = asset!("/assets/icon.png");
+
+const GITHUB_URL: &str = "https://github.com/companion-vr";
+const DISCORD_URL: &str = "https://discord.gg/G46H7B9x";
+
+const NAV_ITEMS: [(&str, &str); 3] = [
+    ("#features", "Features"),
+    ("#specs", "Tech Specs"),
+    ("#download", "Download"),
+];
 
 #[component]
 pub fn Navbar() -> Element {
@@ -19,8 +28,8 @@ pub fn Navbar() -> Element {
                 class: "max-w-7xl mx-auto px-6 h-16 sm:h-20 flex items-center justify-between",
 
                 // Logo
-                a {
-                    href: "#",
+                Link {
+                    to: Route::Home {},
                     class: "flex items-center gap-2 group",
                     img {
                         src: LOGO_IMAGE,
@@ -35,13 +44,18 @@ pub fn Navbar() -> Element {
                 // Desktop Nav
                 nav {
                     class: "hidden md:flex items-center gap-8",
-                    a { href: "#features", class: "text-sm font-medium text-gray-300 hover:text-white transition-colors", "Features" }
-                    a { href: "#specs", class: "text-sm font-medium text-gray-300 hover:text-white transition-colors", "Tech Specs" }
-                    a { href: "#download", class: "text-sm font-medium text-gray-300 hover:text-white transition-colors", "Download" }
+                    for (href, label) in NAV_ITEMS {
+                        NavLink { href, label, variant: NavLinkVariant::Desktop }
+                    }
+                    Link {
+                        to: Route::Docs {},
+                        class: "text-sm font-medium text-gray-300 hover:text-white transition-colors",
+                        "Docs"
+                    }
                     div {
                         class: "flex gap-4",
-                        GithubButton {},
-                        DiscordButton {}
+                        IconButton { href: GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                        IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                     }
                 }
 
@@ -58,28 +72,24 @@ pub fn Navbar() -> Element {
             if menu_open() {
                 nav {
                     class: "md:hidden px-6 pb-6 pt-2 flex flex-col border-t border-white/10 bg-[#05010f]/95 backdrop-blur-md",
-                    a {
-                        href: "#features",
-                        class: "py-3 text-base font-medium text-gray-300 hover:text-white transition-colors",
-                        onclick: move |_| menu_open.set(false),
-                        "Features"
+                    for (href, label) in NAV_ITEMS {
+                        NavLink {
+                            href,
+                            label,
+                            variant: NavLinkVariant::Mobile,
+                            onclick: move |_| menu_open.set(false),
+                        }
                     }
-                    a {
-                        href: "#specs",
+                    Link {
+                        to: Route::Docs {},
                         class: "py-3 text-base font-medium text-gray-300 hover:text-white transition-colors",
                         onclick: move |_| menu_open.set(false),
-                        "Tech Specs"
-                    }
-                    a {
-                        href: "#download",
-                        class: "py-3 text-base font-medium text-gray-300 hover:text-white transition-colors",
-                        onclick: move |_| menu_open.set(false),
-                        "Download"
+                        "Docs"
                     }
                     div {
                         class: "flex gap-4 pt-4 border-t border-white/10",
-                        GithubButton {},
-                        DiscordButton {}
+                        IconButton { href: GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                        IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                     }
                 }
             }

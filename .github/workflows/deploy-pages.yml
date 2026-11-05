@@ -1,0 +1,82 @@
+# Static deployment of the landing page to GitHub Pages.
+#
+# This builds the client-only WASM bundle (`dx build @client --web`) and ships
+# it to Pages. The build-upload API (src/server/builds) is a fullstack server
+# feature and is NOT part of this deployment — it needs a real server host.
+#
+# One-time repo setup: Settings → Pages → Source must be "GitHub Actions"
+# (the configure-pages step below attempts to enable this automatically).
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      # Pages serves project sites at https://<owner>.github.io/<repo>/, so all
+      # asset URLs must be prefixed with the repo name. When switching to a
+      # custom domain, drop the --base-path flag from the build step.
+      - name: Compute base path
+        run: echo "BASE_PATH=/${GITHUB_REPOSITORY#*/}" >> "$GITHUB_ENV"
+
+      # Prebuilt CLI from the Dioxus release (a cargo install takes ~6 min).
+      # Keep this version in sync with `dioxus` in Cargo.toml.
+      - name: Install dx CLI
+        run: |
+          curl -fsSL -o dx.tar.gz \
+            https://github.com/DioxusLabs/dioxus/releases/download/v0.7.10/dx-x86_64-unknown-linux-gnu.tar.gz
+          tar -xzf dx.tar.gz
+          install -m 755 dx /usr/local/bin/dx
+          dx --version
+
+      - name: Build static web app
+        run: dx build @client --web --release --base-path "$BASE_PATH"
+
+      - name: Prepare Pages artifact
+        working-directory: target/dx/companion-landing-page/release/web/public
+        run: |
+          # SPA fallback: GitHub Pages serves 404.html for unknown paths, which
+          # boots the app and lets the router render the catch-all route.
+          cp index.html 404.html
+          touch .nojekyll
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/dx/companion-landing-page/release/web/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

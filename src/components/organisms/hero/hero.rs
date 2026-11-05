@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::DownloadButtons;
+use crate::components::molecules::DownloadButtons;
 
 const DEMO_MODEL: Asset = asset!("/assets/model/demo.glb");
 

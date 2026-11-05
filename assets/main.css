@@ -11,8 +11,14 @@ html {
     overflow-x: hidden;
 }
 
-/* Keep anchored sections clear of the fixed navbar */
-section[id] {
+/* Keep anchored sections and doc headings clear of the fixed navbar */
+section[id],
+.markdown-view h1[id],
+.markdown-view h2[id],
+.markdown-view h3[id],
+.markdown-view h4[id],
+.markdown-view h5[id],
+.markdown-view h6[id] {
     scroll-margin-top: 5.5rem;
 }
 

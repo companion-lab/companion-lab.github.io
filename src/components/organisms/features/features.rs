@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::components::molecules::FeatureCard;
+
 #[derive(Clone, PartialEq)]
 struct Feature {
     icon: &'static str,
@@ -25,13 +27,6 @@ pub fn Features() -> Element {
         Feature { icon: "fa-download", title: "Custom Models", desc: "Import any .vrm character, .vrma motion clip, or expression preset.", color: "pink" },
     ];
 
-    let colors: std::collections::HashMap<&str, (&str, &str)> = [
-        ("purple", ("bg-purple-500/20", "text-purple-400")),
-        ("blue", ("bg-blue-500/20", "text-blue-400")),
-        ("indigo", ("bg-indigo-500/20", "text-indigo-400")),
-        ("pink", ("bg-pink-500/20", "text-pink-400")),
-    ].into_iter().collect();
-
     rsx! {
         section {
             id: "features",
@@ -51,15 +46,7 @@ pub fn Features() -> Element {
                 div {
                     class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
                     for f in features {
-                        div {
-                            class: "glass-card p-6 sm:p-8 rounded-2xl group reveal active",
-                            div {
-                                class: "w-12 h-12 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300 {colors.get(f.color).map(|c| c.0).unwrap_or(\"\")}",
-                                i { class: "fa-solid {f.icon} text-2xl {colors.get(f.color).map(|c| c.1).unwrap_or(\"\")}" }
-                            }
-                            h3 { class: "text-xl font-semibold text-white mb-3", "{f.title}" }
-                            p { class: "text-gray-400 text-sm leading-relaxed", "{f.desc}" }
-                        }
+                        FeatureCard { icon: f.icon, title: f.title, desc: f.desc, color: f.color }
                     }
                 }
             }

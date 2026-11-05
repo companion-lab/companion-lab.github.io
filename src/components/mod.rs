@@ -1,15 +1,14 @@
-mod buttons;
-mod cta;
-mod features;
-mod footer;
-mod hero;
-mod navbar;
-mod specs;
+//! UI components, organized in atomic-design layers:
+//! - [`atoms`]: the smallest leaf units (buttons, links)
+//! - [`molecules`]: small composites of atoms (button groups, cards, rows)
+//! - [`organisms`]: full page sections (navbar, hero, footer)
+//!
+//! Pages (`src/pages/`) compose organisms.
 
-pub use buttons::*;
-pub use cta::*;
-pub use features::*;
-pub use footer::*;
-pub use hero::*;
-pub use navbar::*;
-pub use specs::*;
+mod atoms;
+mod molecules;
+mod organisms;
+
+pub use atoms::*;
+pub use molecules::*;
+pub use organisms::*;
