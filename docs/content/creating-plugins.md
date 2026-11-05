@@ -148,13 +148,75 @@ A few ABI-safety rules worth knowing:
 
 ## Build and install
 
-Build the package with the companion CLI and zip it for distribution:
+### Package with the `companion-plugin` CLI
+
+The `companion-plugin` CLI bundles your frontend, builds your backend, and
+zips everything into a package ready for the app's import flow. The zip
+contains only package files — `manifest.json`, the bundled frontend entry,
+and the backend library. Sources, `node_modules/`, and cargo `target/` never
+ship.
+
+Run it straight from the repository — no install step needed:
 
 ```bash
 node plugin-cli/bin/companion-plugin.mjs build examples/notes-plugin
 # -> dist/notes-0.1.0.zip
 ```
 
-Then import it via **Settings → Plugins → Import plugin…**. For development,
-drop the built package into the repo's `plugins/` staging directory — debug
-builds discover it automatically.
+Or install it once as a global command:
+
+```bash
+# inside plugin-cli/ — it is standalone, not part of the app workspace
+pnpm install
+
+# then expose the command
+npm link                # or: pnpm link --global
+companion-plugin build examples/all-features-plugin
+```
+
+esbuild is also resolved from `app/node_modules` as a fallback, so the CLI
+usually works even without the install step. The frontend is bundled with
+esbuild (React is aliased to the host's copies via the SDK shims — never
+bundled). The Rust backend is built with `cargo build --release` whenever
+`backend/` and `manifest.backend` both exist; use `--no-backend` to skip it.
+
+### CLI options
+
+| Option | Meaning |
+| --- | --- |
+| `--out <dir>` | Directory for the zip (default `./dist`) |
+| `--name <file>` | Zip filename (default `<id>-<version>.zip`) |
+| `--flat` | Put `manifest.json` at the zip root instead of inside an `<id>/` folder — the importer accepts both layouts |
+| `--no-backend` | Skip the Rust build even if `backend/` exists |
+| `--no-frontend` | Skip the JS bundle (backend-only plugin) |
+| `--sdk <dir>` | Path to the plugin JS SDK (default `<repo>/sdk/js/@companion/plugin`) |
+
+Zip entries use a fixed timestamp, so identical inputs produce
+byte-identical archives.
+
+### Import into the app
+
+Open **Settings → Plugins → Import plugin…** and pick the zip. Both layouts
+are accepted — one top-level folder named after the plugin id:
+
+```
+notes/
+  manifest.json
+  frontend.js
+  libnotes_backend.dylib
+```
+
+or the flat layout from `--flat` (`manifest.json` at the zip root).
+
+### The fast dev loop
+
+While iterating inside the repository, skip the zip entirely and build the
+unpacked package into the dev staging directory:
+
+```bash
+node app/scripts/build-plugin.mjs examples/notes-plugin --backend --out plugins/notes
+```
+
+That script is a thin wrapper over the same build logic that powers the
+CLI. Debug builds discover plugins in the repo's `plugins/` staging
+directory automatically.
