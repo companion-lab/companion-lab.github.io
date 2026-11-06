@@ -49,7 +49,7 @@ Plugin frontends are React bundles activated with a scoped `PluginContext`.
 They never bundle React — the host injects its own copies at activation time.
 
 ```tsx
-import { definePlugin } from "@companion/plugin";
+import { definePlugin } from "@companion-lab/plugin";
 
 export default definePlugin((ctx) => {
   ctx.log.info("activating");
@@ -89,15 +89,18 @@ export default definePlugin((ctx) => {
 | `ui` | The host's UI kit so plugins match the app design |
 
 The reference implementation covering every extension point is the
-[`notes` example plugin](https://github.com/companion-vr) in the repository.
+`notes-plugin` example in the repository (see `examples/notes-plugin`),
+and the official feature plugins live at
+https://github.com/companion-lab (e.g. `companion-plugin-alarms`).
 
 ## Backend (Rust, optional)
 
-A backend is a `cdylib` crate depending on `companion-plugin-sdk` and
-exporting the ABI via `export_plugin!`:
+A backend is a `cdylib` crate depending on `companion-plugin-sdk` (published
+on crates.io) and exporting the ABI via `export_plugin!`:
 
 ```rust
 use companion_plugin_sdk::{export_plugin, Plugin, PluginCtx, ToolDef};
+// Cargo.toml: companion-plugin-sdk = "0.1"
 use serde_json::{json, Value};
 
 struct MyBackend;
@@ -156,7 +159,14 @@ contains only package files — `manifest.json`, the bundled frontend entry,
 and the backend library. Sources, `node_modules/`, and cargo `target/` never
 ship.
 
-Run it straight from the repository — no install step needed:
+Install dependencies first (the frontend SDK comes from npm as
+`@companion-lab/plugin`):
+
+```bash
+npm install
+```
+
+Then run it straight from the repository:
 
 ```bash
 node plugin-cli/bin/companion-plugin.mjs build examples/notes-plugin
@@ -189,7 +199,7 @@ bundled). The Rust backend is built with `cargo build --release` whenever
 | `--flat` | Put `manifest.json` at the zip root instead of inside an `<id>/` folder — the importer accepts both layouts |
 | `--no-backend` | Skip the Rust build even if `backend/` exists |
 | `--no-frontend` | Skip the JS bundle (backend-only plugin) |
-| `--sdk <dir>` | Path to the plugin JS SDK (default `<repo>/sdk/js/@companion/plugin`) |
+| `--sdk <dir>` | Path to the plugin JS SDK (default resolves from `node_modules/@companion-lab/plugin`) |
 
 Zip entries use a fixed timestamp, so identical inputs produce
 byte-identical archives.
