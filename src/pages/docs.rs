@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{AmbientBackground, Footer, MarkdownView, scroll_to_id},
+    components::{scroll_to_id, AmbientBackground, Footer, MarkdownView},
     route::Route,
 };
 
@@ -90,7 +90,7 @@ fn DocsView(slug: Option<String>) -> Element {
             class: "relative min-h-screen pb-24 pt-24 sm:pt-32",
             AmbientBackground {}
             div {
-                class: "relative z-10 mx-auto max-w-7xl px-6",
+                class: "relative z-10 mx-auto max-w-7xl px-6 pb-16",
                 div {
                     class: "mb-10 reveal active",
                     p { class: "mb-2 text-sm font-semibold uppercase tracking-wider text-purple-400", "Documentation" }
@@ -99,7 +99,7 @@ fn DocsView(slug: Option<String>) -> Element {
                 }
 
                 div {
-                    class: "flex flex-col items-start gap-8 lg:flex-row",
+                    class: "flex flex-col items-stretch gap-8 lg:flex-row lg:items-start",
                     aside {
                         class: "w-full lg:sticky lg:top-28 lg:w-64 lg:shrink-0",
                         nav {
@@ -121,7 +121,7 @@ fn DocsView(slug: Option<String>) -> Element {
                     }
 
                     div {
-                        class: "min-w-0 flex-1 rounded-2xl glass-panel p-6 sm:p-10",
+                        class: "min-w-0 w-full flex-1 rounded-2xl glass-panel p-6 sm:p-10",
                         match active {
                             Some(article) => rsx! {
                                 MarkdownView { markdown: article.markdown }
