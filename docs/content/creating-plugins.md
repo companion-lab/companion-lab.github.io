@@ -151,41 +151,50 @@ A few ABI-safety rules worth knowing:
 
 ## Build and install
 
-### Package with the `companion-plugin` CLI
+### Package with the `companion-cli` CLI
 
-The `companion-plugin` CLI bundles your frontend, builds your backend, and
+The `companion-cli` CLI bundles your frontend, builds your backend, and
 zips everything into a package ready for the app's import flow. The zip
 contains only package files — `manifest.json`, the bundled frontend entry,
 and the backend library. Sources, `node_modules/`, and cargo `target/` never
 ship.
 
-Install dependencies first (the frontend SDK comes from npm as
-`@companion-lab/plugin`):
+Install the CLI globally from npm:
+
+```bash
+npm install -g companion-cli
+```
+
+Or use it without installing via `npx companion-cli <command>`.
+
+Then scaffold (optional) and build your plugin:
+
+```bash
+companion-cli init my-plugin    # optional scaffold (frontend + backend)
+companion-cli build my-plugin
+# -> my-plugin/dist/my-plugin-0.1.0.zip
+```
+
+Inside your plugin project, install dependencies first (the frontend SDK
+comes from npm as `@companion-lab/plugin`):
 
 ```bash
 npm install
 ```
 
-Then run it straight from the repository:
+Running from a companion-tauri checkout, the CLI also works straight from the
+repository without any install:
 
 ```bash
-node plugin-cli/bin/companion-plugin.mjs build examples/notes-plugin
-# -> dist/notes-0.1.0.zip
+node plugin-cli/bin/companion-cli.mjs build my-plugin
 ```
 
-Or install it once as a global command:
-
-```bash
-# inside plugin-cli/ — it is standalone, not part of the app workspace
-pnpm install
-
-# then expose the command
-npm link                # or: pnpm link --global
-companion-plugin build examples/all-features-plugin
-```
-
-esbuild is also resolved from `app/node_modules` as a fallback, so the CLI
-usually works even without the install step. The frontend is bundled with
+esbuild is resolved from the CLI's own dependencies (or `app/node_modules` as
+a fallback), so the CLI works even without the install step. The frontend is
+bundled with
+esbuild (React is aliased to the host's copies via the SDK shims — never
+bundled). The Rust backend is built with `cargo build --release` whenever
+`backend/` and `manifest.backend` both exist; use `--no-backend` to skip it.
 esbuild (React is aliased to the host's copies via the SDK shims — never
 bundled). The Rust backend is built with `cargo build --release` whenever
 `backend/` and `manifest.backend` both exist; use `--no-backend` to skip it.
