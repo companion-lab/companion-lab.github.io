@@ -1237,6 +1237,13 @@
       }
     }
   }
+  .group-hover\:text-purple-300 {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        color: var(--color-purple-300);
+      }
+    }
+  }
   .group-hover\:text-purple-400\/70 {
     &:is(:where(.group):hover *) {
       @media (hover: hover) {

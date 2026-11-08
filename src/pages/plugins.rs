@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::{AmbientBackground, Footer},
+    config::COMMUNITY_GITHUB_URL,
     route::Route,
 };
 
@@ -11,6 +12,9 @@ use crate::{
 #[derive(Clone, PartialEq)]
 pub struct PluginEntry {
     pub id: &'static str,
+    /// GitHub repo name under the community org — the card links there.
+    /// Not derivable from `id` (see `companion-plugin-l2d`), so it is stored.
+    pub repo: &'static str,
     pub name: &'static str,
     pub version: &'static str,
     pub description: &'static str,
@@ -29,6 +33,7 @@ pub struct PluginEntry {
 pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     PluginEntry {
         id: "chat",
+        repo: "companion-plugin-chat",
         name: "Chat",
         version: "0.1.0",
         description: "The avatar's AI conversation: provider chat with tool loop, streaming TTS/STT speech, wake word, clarifying questions, and the Persona/Connection settings sections.",
@@ -40,6 +45,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     },
     PluginEntry {
         id: "vrm",
+        repo: "companion-plugin-vrm",
         name: "VRM Avatar",
         version: "0.1.0",
         description: "VRM avatar models (with the built-in demo asset), motion and emotion clips, and graphics settings.",
@@ -51,6 +57,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     },
     PluginEntry {
         id: "companion-plugin-l2d",
+        repo: "companion-plugin-l2d",
         name: "Live2D Avatar",
         version: "0.1.0",
         description: "Live2D avatar for the desktop overlay: renders the bundled Cubism model and answers the avatar bus (chat emotions, TTS lip sync, click-through).",
@@ -62,6 +69,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     },
     PluginEntry {
         id: "stt",
+        repo: "companion-plugin-stt",
         name: "Speech Recognition",
         version: "0.1.1",
         description: "On-device STT (Moonshine) + cloud transcription, with a Speech Recognition settings tab and the cloud STT endpoint card.",
@@ -73,6 +81,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     },
     PluginEntry {
         id: "tts",
+        repo: "companion-plugin-tts",
         name: "Speech Synthesis",
         version: "0.1.0",
         description: "On-device TTS (Supertonic) + cloud synthesis, with a Speech Synthesis settings tab and the cloud TTS endpoint card.",
@@ -84,6 +93,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     },
     PluginEntry {
         id: "alarms",
+        repo: "companion-plugin-alarms",
         name: "Alarms",
         version: "0.1.0",
         description: "Timed alarms and reminders: a settings tab, the ringing banner, and alarm tools the avatar can call.",
@@ -95,6 +105,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     },
     PluginEntry {
         id: "calendar",
+        repo: "companion-plugin-calendar",
         name: "Calendar",
         version: "0.1.0",
         description: "Dated events, birthdays, and appointments: a settings tab, reminder banners, and calendar tools the avatar can call.",
@@ -106,6 +117,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
     },
     PluginEntry {
         id: "mcp",
+        repo: "companion-plugin-mcp",
         name: "MCP Tools",
         version: "0.1.0",
         description: "Model Context Protocol client: connect MCP servers and expose their tools to the avatar.",
@@ -330,7 +342,8 @@ pub fn Plugins() -> Element {
 
 /// One cell of the plugin data-grid: square hairline icon badge, version tag,
 /// declared permissions as mono chips, and the shipped entry points. Indexes
-/// like a register (`p.01`), matching the feature cells' `f.01`.
+/// like a register (`p.01`), matching the feature cells' `f.01`. The whole
+/// cell is a link to the plugin's repository, opened in a new tab.
 #[component]
 fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
     let icon_color = match plugin.color {
@@ -347,8 +360,12 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
     };
 
     rsx! {
-        div {
-            class: "group relative bg-[#08040f]/85 p-6 transition-colors hover:bg-[#140a26]",
+        a {
+            href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            "aria-label": "View the {plugin.name} plugin repository on GitHub",
+            class: "group relative block bg-[#08040f]/85 p-6 transition-colors hover:bg-[#140a26]",
             span {
                 class: "absolute top-3 right-4 font-mono text-[10px] tracking-[0.2em] text-gray-600 transition-colors group-hover:text-purple-400/70",
                 "p.{index}"
@@ -378,7 +395,15 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
                     }
                 }
             }
-            span { class: "font-mono text-[10px] uppercase tracking-[0.2em] text-gray-600", "{kind}" }
+            div {
+                class: "flex items-center justify-between gap-2",
+                span { class: "font-mono text-[10px] uppercase tracking-[0.2em] text-gray-600", "{kind}" }
+                span {
+                    class: "flex items-center gap-1.5 font-mono text-[10px] tracking-[0.2em] text-gray-600 transition-colors group-hover:text-purple-300",
+                    i { class: "fa-brands fa-github text-xs", "aria-hidden": "true" }
+                    "source"
+                }
+            }
         }
     }
 }
