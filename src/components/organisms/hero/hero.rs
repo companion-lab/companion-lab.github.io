@@ -23,13 +23,22 @@ pub fn Hero() -> Element {
                 // Left: Text Content
                 div {
                     class: "flex flex-col items-start z-10 reveal active",
+                    div {
+                        class: "mb-6 flex w-full max-w-xl items-center justify-between gap-4 border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
+                        span { "cmp://home" }
+                        span { class: "flex items-center gap-2 text-gray-500",
+                            span { class: "hud-dot", "aria-hidden": "true" }
+                            "avatar: local renderer"
+                        }
+                    }
                     h1 {
-                        class: "text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight mb-6",
+                        class: "text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight mb-6",
                         "A 3D VRM avatar "
                         br {}
-                        span { class: "text-gradient", "on your desktop" }
+                        span { class: "text-purple-500", "on your desktop" }
                         br {}
                         "for your AI agent"
+                        span { class: "hud-cursor text-purple-400", "_" }
                     }
                     p {
                         class: "text-base sm:text-lg text-gray-400 mb-8 max-w-xl leading-relaxed",
@@ -37,13 +46,12 @@ pub fn Hero() -> Element {
                     }
                     DownloadButtons { centered: false }
                     p {
-                        class: "text-xs text-gray-400 mt-2",
-                        "Desktop build via Tauri v2. Requires models: pnpm models + Moonshine STT."
+                        class: "font-mono text-[11px] uppercase tracking-[0.15em] text-gray-500 mt-4",
+                        "// desktop build via tauri v2 — models: pnpm models + moonshine stt"
                     }
                     p {
-                        class: "text-xs text-gray-400 mt-4",
-                        i { class: "fa-solid fa-shield-check mr-1" }
-                        " Tauri v2 desktop shell. OpenAI / Anthropic / Gemini providers."
+                        class: "font-mono text-[11px] uppercase tracking-[0.15em] text-gray-500 mt-2",
+                        "// providers: openai-compatible · anthropic · gemini"
                     }
                 }
 
@@ -51,24 +59,37 @@ pub fn Hero() -> Element {
                 div {
                     class: "relative w-full h-[480px] sm:h-[560px] flex items-center justify-center z-10 reveal active lg:justify-end",
                     div {
-                        class: "relative w-full max-w-[540px] h-[440px] sm:h-[540px] p-6 sm:p-8 flex flex-col items-center justify-center",
+                        class: "hud-frame hud-grid relative w-full max-w-[540px] h-[440px] sm:h-[540px] border border-white/10 bg-[#08040f]/50 p-4 sm:p-6 flex flex-col",
+                        div { class: "hud-frame-inner flex h-full flex-col",
+                            div {
+                                class: "flex items-center justify-between pb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-gray-500",
+                                span { class: "text-purple-300/80", "render.viewport // vrm-01" }
+                                span { "live" }
+                            }
 
-                        // Live 3D avatar
-                        div {
-                            class: "relative w-full flex-1 min-h-0 mt-2",
-                            canvas {
-                                id: "hero-vrm-canvas",
-                                class: "absolute inset-0 h-full w-full",
-                            }
+                            // Live 3D avatar
                             div {
-                                id: "hero-vrm-loading",
-                                class: "absolute inset-0 flex items-center justify-center",
-                                span { class: "text-xs text-gray-400 tracking-widest uppercase animate-pulse", "Loading avatar..." }
+                                class: "relative w-full flex-1 min-h-0",
+                                canvas {
+                                    id: "hero-vrm-canvas",
+                                    class: "absolute inset-0 h-full w-full",
+                                }
+                                div {
+                                    id: "hero-vrm-loading",
+                                    class: "absolute inset-0 flex items-center justify-center",
+                                    span { class: "font-mono text-xs text-gray-400 tracking-[0.2em] uppercase animate-pulse", "loading avatar // please stand by" }
+                                }
+                                div {
+                                    id: "hero-vrm-fallback",
+                                    class: "absolute inset-0 hidden items-center justify-center",
+                                    i { class: "fa-solid fa-robot text-5xl text-white/80" }
+                                }
                             }
+
                             div {
-                                id: "hero-vrm-fallback",
-                                class: "absolute inset-0 hidden items-center justify-center",
-                                i { class: "fa-solid fa-robot text-5xl text-white/80" }
+                                class: "flex items-center justify-between pt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-gray-600",
+                                span { "three.js // three-vrm" }
+                                span { "realtime" }
                             }
                         }
                     }

@@ -47,6 +47,11 @@ pub fn Navbar() -> Element {
                         NavLink { href, label, variant: NavLinkVariant::Desktop }
                     }
                     Link {
+                        to: Route::Plugins {},
+                        class: "text-sm font-medium text-gray-300 hover:text-white transition-colors",
+                        "Plugins"
+                    }
+                    Link {
                         to: Route::Docs {},
                         class: "text-sm font-medium text-gray-300 hover:text-white transition-colors",
                         "Docs"
@@ -78,6 +83,12 @@ pub fn Navbar() -> Element {
                             variant: NavLinkVariant::Mobile,
                             onclick: move |_| menu_open.set(false),
                         }
+                    }
+                    Link {
+                        to: Route::Plugins {},
+                        class: "py-3 text-base font-medium text-gray-300 hover:text-white transition-colors",
+                        onclick: move |_| menu_open.set(false),
+                        "Plugins"
                     }
                     Link {
                         to: Route::Docs {},

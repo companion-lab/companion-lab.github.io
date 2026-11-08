@@ -78,26 +78,26 @@ fn CodeBlock(lang: String, code: String) -> Element {
 
     rsx! {
         div {
-            class: "my-6 overflow-hidden rounded-lg border border-white/10",
+            class: "my-6 overflow-hidden border border-white/10",
             div {
-                class: "flex items-center justify-between bg-white/5 px-4 py-2",
+                class: "flex items-center justify-between bg-black/40 px-4 py-2",
                 span {
-                    class: "text-xs font-medium uppercase tracking-wider text-gray-400",
+                    class: "font-mono text-[10px] uppercase tracking-[0.2em] text-purple-300/80",
                     if lang.is_empty() { "code" } else { "{lang}" }
                 }
                 button {
-                    class: "flex items-center gap-1.5 text-xs text-gray-400 transition-colors hover:text-white",
+                    class: "flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 transition-colors hover:text-white",
                     "aria-label": "Copy code to clipboard",
                     onclick,
                     i {
                         class: if copied() { "fa-solid fa-check text-green-400" } else { "fa-regular fa-copy" },
                         "aria-hidden": "true",
                     }
-                    if copied() { "Copied!" } else { "Copy" }
+                    if copied() { "copied" } else { "copy" }
                 }
             }
             pre {
-                class: "overflow-x-auto bg-black/50 p-4",
+                class: "overflow-x-auto bg-black/60 p-4",
                 code { class: "whitespace-pre font-mono text-sm leading-relaxed text-purple-100/90", "{code}" }
             }
         }
@@ -116,7 +116,7 @@ fn parse_blocks(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
                     *cursor += 1;
                     let inline = parse_inline(events, cursor);
                     blocks.push(rsx! {
-                        p { class: "my-4 leading-relaxed text-gray-300", for element in inline { {element} } }
+                        p { class: "my-4 leading-relaxed text-gray-400", for element in inline { {element} } }
                     });
                 }
                 Tag::Heading { level, .. } => {
@@ -211,7 +211,7 @@ fn parse_blocks(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
 
                     blocks.push(rsx! {
                         div {
-                            class: "my-6 overflow-x-auto rounded-lg border border-white/10",
+                            class: "my-6 overflow-x-auto border border-white/10",
                             table {
                                 class: "w-full border-collapse text-sm",
                                 thead { for cell in head { {cell} } }
@@ -271,7 +271,7 @@ fn parse_inline(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
                 flush_text(&mut text, &mut out);
                 let code = chunk.clone();
                 out.push(rsx! {
-                    code { class: "rounded bg-white/10 px-1.5 py-0.5 font-mono text-[0.9em] text-pink-300", "{code}" }
+                    code { class: "bg-purple-500/10 px-1.5 py-0.5 font-mono text-[0.9em] text-purple-300", "{code}" }
                 });
                 *cursor += 1;
             }
@@ -343,7 +343,7 @@ fn parse_inline(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
                 flush_text(&mut text, &mut out);
                 let src = dest_url.to_string();
                 out.push(rsx! {
-                    img { src, alt, class: "my-6 max-w-full rounded-xl border border-white/10" }
+                    img { src, alt, class: "my-6 max-w-full border border-white/10" }
                 });
             }
             // A nested block inside inline content (e.g. a list inside a
@@ -445,7 +445,7 @@ fn parse_table_cells(
                 let content = parse_inline(events, cursor);
                 cells.push(if head {
                     rsx! {
-                        th { class: "bg-white/5 px-4 py-2.5 font-semibold text-white {align_class}", for element in content { {element} } }
+                        th { class: "bg-black/40 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-purple-300/90 {align_class}", for element in content { {element} } }
                     }
                 } else {
                     rsx! {
@@ -468,22 +468,24 @@ fn render_heading(level: HeadingLevel, inline: Vec<Element>, id: String) -> Elem
     let id = if id.is_empty() { None } else { Some(id) };
     match level {
         HeadingLevel::H1 => rsx! {
-            h1 { id, class: "mb-6 mt-2 border-b border-white/10 pb-3 text-3xl font-bold text-white sm:text-4xl", for element in inline { {element} } }
+            h1 { id, class: "mb-6 mt-2 border-b border-white/10 pb-3 text-3xl font-black uppercase tracking-tight text-white sm:text-4xl", for element in inline { {element} } }
         },
+        // Section headings carry the dossier accent bar; h3+ step down in
+        // mono-spaced-caps like the legal page's subsection titles.
         HeadingLevel::H2 => rsx! {
-            h2 { id, class: "mb-4 mt-10 text-2xl font-semibold text-white", for element in inline { {element} } }
+            h2 { id, class: "mb-4 mt-10 border-l-2 border-purple-500/70 pl-3 text-xl font-semibold uppercase tracking-[0.14em] text-white sm:text-2xl", for element in inline { {element} } }
         },
         HeadingLevel::H3 => rsx! {
-            h3 { id, class: "mb-3 mt-8 text-xl font-semibold text-purple-300", for element in inline { {element} } }
+            h3 { id, class: "mb-3 mt-8 text-sm font-semibold uppercase tracking-[0.18em] text-purple-300", for element in inline { {element} } }
         },
         HeadingLevel::H4 => rsx! {
-            h4 { id, class: "mb-2 mt-6 text-lg font-semibold text-gray-100", for element in inline { {element} } }
+            h4 { id, class: "mb-2 mt-6 text-base font-semibold tracking-wide text-gray-100", for element in inline { {element} } }
         },
         HeadingLevel::H5 => rsx! {
-            h5 { id, class: "mb-2 mt-4 font-semibold text-gray-200", for element in inline { {element} } }
+            h5 { id, class: "mb-2 mt-4 text-sm font-semibold text-gray-200", for element in inline { {element} } }
         },
         HeadingLevel::H6 => rsx! {
-            h6 { id, class: "mb-2 mt-4 text-sm font-semibold text-gray-400", for element in inline { {element} } }
+            h6 { id, class: "mb-2 mt-4 font-mono text-xs uppercase tracking-[0.15em] text-gray-400", for element in inline { {element} } }
         },
     }
 }

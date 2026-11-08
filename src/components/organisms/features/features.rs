@@ -34,19 +34,36 @@ pub fn Features() -> Element {
             div {
                 class: "max-w-7xl mx-auto px-6",
                 div {
-                    class: "text-center mb-10 sm:mb-16 reveal active",
+                    class: "mb-10 sm:mb-16 reveal active",
+                    div {
+                        class: "flex items-center justify-between gap-4 border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
+                        span { "mod.01 // capabilities" }
+                        span { class: "text-gray-500", "{features.len()} modules loaded" }
+                    }
                     h2 {
-                        class: "text-3xl md:text-5xl font-bold mb-4",
+                        class: "mt-8 text-4xl md:text-6xl font-black uppercase tracking-tight text-white",
                         "What "
-                        span { class: "text-gradient", "Companion" }
+                        span { class: "text-purple-500", "Companion" }
                         " does"
                     }
-                    p { class: "text-gray-400 max-w-2xl mx-auto text-lg", "A transparent VRM avatar, speech, tool-calling, alarms, and chat — running on your desktop." }
+                    p {
+                        class: "mt-4 max-w-2xl text-gray-400 sm:text-lg",
+                        "A transparent VRM avatar, speech, tool-calling, alarms, and chat — running on your desktop."
+                    }
                 }
+                // Hairline data-grid: cells share 1px seams drawn by the gap
+                // over the wrapper background.
                 div {
-                    class: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
-                    for f in features {
-                        FeatureCard { icon: f.icon, title: f.title, desc: f.desc, color: f.color }
+                    class: "grid grid-cols-1 gap-px border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4",
+                    for (i, f) in features.iter().enumerate() {
+                        FeatureCard {
+                            key: "{f.title}",
+                            icon: f.icon,
+                            title: f.title,
+                            desc: f.desc,
+                            color: f.color,
+                            index: format!("{:02}", i + 1),
+                        }
                     }
                 }
             }

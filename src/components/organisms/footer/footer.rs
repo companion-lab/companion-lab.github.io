@@ -51,6 +51,11 @@ pub fn Footer() -> Element {
                     external: false,
                 },
                 FooterLink {
+                    label: "Plugins",
+                    href: "/plugins",
+                    external: false,
+                },
+                FooterLink {
                     label: "Settings",
                     href: "#",
                     external: false,
