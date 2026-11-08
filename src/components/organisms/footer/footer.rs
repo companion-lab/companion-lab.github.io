@@ -87,12 +87,12 @@ pub fn Footer() -> Element {
             vec![
                 FooterLink {
                     label: "Privacy",
-                    href: "#",
+                    href: "/legal#privacy",
                     external: false,
                 },
                 FooterLink {
                     label: "Terms",
-                    href: "#",
+                    href: "/legal#terms",
                     external: false,
                 },
             ],

@@ -49,6 +49,11 @@
         <script>
             // Must run after #main exists (it sits directly above).
             (function () {
+                // Stash the entry URL's hash before the WASM bundle runs: the
+                // router rewrites the URL to the canonical route (dropping the
+                // fragment) while booting, and first-load #section scrolls
+                // (see scroll_to_entry_hash) need the original.
+                window.__initialHash = window.location.hash;
                 var splash = document.getElementById("splash");
                 var main = document.getElementById("main");
                 var observer = new MutationObserver(function () {

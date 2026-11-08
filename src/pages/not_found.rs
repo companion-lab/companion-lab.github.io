@@ -11,7 +11,7 @@ pub fn NotFound(segments: Vec<String>) -> Element {
         div {
             class: "flex flex-col items-center justify-center h-screen",
             h1 { class: "text-6xl font-bold mb-4", "404" }
-            p { class: "text-xl text-gray-600 pb-5", "Page {url} not found" }
+            p { class: "text-xl text-gray-400 pb-5", "Page {url} not found" }
             ActionButton {
                 variant: ButtonVariant::Primary,
                 onmousedown: move |_| navigator.go_back(),

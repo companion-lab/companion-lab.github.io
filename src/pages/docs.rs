@@ -4,9 +4,7 @@ use crate::{
     components::{AmbientBackground, Footer, MarkdownView},
     route::Route,
 };
-// Only used by the wasm-only hash-scroll retry below; unused on the server.
-#[cfg(target_arch = "wasm32")]
-use crate::components::scroll_to_id;
+use crate::components::scroll_to_entry_hash;
 
 /// One documentation article.
 pub struct DocArticle {
@@ -75,18 +73,9 @@ fn DocsView(slug: Option<String>) -> Element {
         .and_then(|a| DOC_ARTICLES.iter().position(|c| c.slug == a.slug))
         .and_then(|p| DOC_ARTICLES.get(p + 1));
 
-    // Honor `#heading` URLs on first load: the browser's own hash scroll runs
-    // before the WASM app has rendered anything, so it needs a second try.
-    use_effect(move || {
-        #[cfg(target_arch = "wasm32")]
-        if let Some(window) = web_sys::window() {
-            if let Ok(hash) = window.location().hash() {
-                if hash.len() > 1 {
-                    scroll_to_id(&hash[1..]);
-                }
-            }
-        }
-    });
+    // Honor `#heading` URLs on first load, reliably — see scroll_to_entry_hash
+    // for why a single "read the hash and scroll" pass loses races.
+    use_effect(scroll_to_entry_hash);
 
     rsx! {
         div {
@@ -170,7 +159,9 @@ fn DocsView(slug: Option<String>) -> Element {
                     }
                 }
             }
-            Footer {}
         }
+        // Footer sits outside the padded min-h-screen wrapper — a bottom
+        // padding on this wrapper would render as an empty strip below it.
+        Footer {}
     }
 }

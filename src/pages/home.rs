@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::components::{
-    AmbientBackground, Cta, Features, Footer, Hero, Specs, SECTION_SCROLL_TARGET, scroll_to_id,
+    AmbientBackground, Cta, Features, Footer, Hero, Specs, SECTION_SCROLL_TARGET,
+    scroll_to_entry_hash, scroll_to_id,
 };
 
 /// Home page
@@ -19,18 +20,9 @@ pub fn Home() -> Element {
         }
     });
 
-    // Honor `#section` URLs on first load: the browser's own hash scroll runs
-    // before the WASM app has rendered anything, so it needs a second try.
-    use_effect(move || {
-        #[cfg(target_arch = "wasm32")]
-        if let Some(window) = web_sys::window() {
-            if let Ok(hash) = window.location().hash() {
-                if hash.len() > 1 {
-                    scroll_to_id(&hash[1..]);
-                }
-            }
-        }
-    });
+    // Honor `#section` URLs on first load, reliably — see scroll_to_entry_hash
+    // for why a single "read the hash and scroll" pass loses races.
+    use_effect(scroll_to_entry_hash);
 
     rsx! {
         AmbientBackground {}
