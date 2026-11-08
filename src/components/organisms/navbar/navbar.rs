@@ -31,6 +31,7 @@ pub fn Navbar() -> Element {
                     class: "flex items-center gap-2 group",
                     img {
                         src: LOGO_IMAGE,
+                        alt: "Companion logo",
                         class: "h-10 w-10 sm:h-12 sm:w-12",
                     }
                     span {

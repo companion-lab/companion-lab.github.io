@@ -62,7 +62,7 @@ pub fn Footer() -> Element {
                             i { class: "fa-solid fa-cube text-purple-400" }
                             span { class: "text-xl font-bold text-white", "Companion" }
                         }
-                        p { class: "text-sm text-gray-500 mb-6", "A transparent VRM avatar on your desktop — the visual body of your AI agent." }
+                        p { class: "text-sm text-gray-400 mb-6", "A transparent VRM avatar on your desktop — the visual body of your AI agent." }
                         div {
                             class: "flex gap-4",
                             IconButton { href: GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
@@ -74,7 +74,7 @@ pub fn Footer() -> Element {
                     }
                 }
                 div {
-                    class: "border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600",
+                    class: "border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400",
                     p { "\u{00A9} 2026 Companion. All rights reserved." }
                     div {
                         class: "flex gap-4",

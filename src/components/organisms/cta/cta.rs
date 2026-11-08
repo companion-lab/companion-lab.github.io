@@ -17,7 +17,7 @@ pub fn Cta() -> Element {
                 h2 { class: "text-3xl sm:text-4xl md:text-5xl font-bold mb-6", "Ready to meet your companion?" }
                 p { class: "text-lg sm:text-xl text-gray-300 mb-10", "Download for your platform and run the setup." }
                 DownloadButtons { centered: true }
-                p { class: "mt-8 text-sm text-gray-500",
+                p { class: "mt-8 text-sm text-gray-400",
                     "New here? Read the "
                     Link {
                         to: Route::Docs {},

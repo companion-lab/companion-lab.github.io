@@ -29,9 +29,9 @@ pub fn FooterColumn(title: &'static str, links: Vec<FooterLink>) -> Element {
 
     rsx! {
         div {
-            h4 { class: "text-white font-semibold mb-4", "{title}" }
+            h3 { class: "text-white font-semibold mb-4", "{title}" }
             ul {
-                class: "space-y-2 text-sm text-gray-500",
+                class: "space-y-2 text-sm text-gray-400",
                 for link in links {
                     li {
                         if link.href.len() > 1 && link.href.starts_with('#') {

@@ -3,7 +3,7 @@
 [web.app]
 
 # HTML title tag content
-title = "companion-landing-page"
+title = "Companion — a transparent VRM avatar on your desktop"
 
 # include `assets` in web platform
 [web.resource]

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{app_title}</title>
+        <meta charset="UTF-8">
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta
+            name="description"
+            content="Companion puts a transparent VRM avatar on your desktop — the visual body of your AI agent. Open-source, plugin-based, and built with Tauri v2."
+        >
+        <meta name="theme-color" content="#05010f">
+
+        <!-- Static icon links so browsers never hit the /favicon.ico fallback
+             (which logs a console error and delays icon discovery). -->
+        <link rel="icon" type="image/png" href="/{base_path}/favicon.png">
+        <link rel="icon" type="image/x-icon" href="/{base_path}/favicon.ico">
+        <link rel="apple-touch-icon" href="/{base_path}/icon.png">
+
+        <!-- Social preview cards -->
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Companion">
+        <meta property="og:title" content="{app_title}">
+        <meta
+            property="og:description"
+            content="The visual body of your AI agent: a transparent VRM avatar that lives on your desktop. Open-source, plugin-based, built with Tauri v2."
+        >
+        <meta property="og:url" content="https://companion-lab.github.io/{base_path}/">
+        <meta property="og:image" content="https://companion-lab.github.io/{base_path}/icon.png">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="{app_title}">
+        <meta
+            name="twitter:description"
+            content="The visual body of your AI agent: a transparent VRM avatar that lives on your desktop. Open-source, plugin-based, built with Tauri v2."
+        >
+        <meta name="twitter:image" content="https://companion-lab.github.io/{base_path}/icon.png">
+    </head>
+    <body>
+        <!-- Instant-paint splash: the app bundle (wasm) takes a while to boot,
+             so paint something on-brand first. Removed as soon as Dioxus
+             mounts children into #main. -->
+        <div id="splash" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#05010f;font-family:system-ui,-apple-system,sans-serif;transition:opacity .3s ease;">
+            <img src="/{base_path}/favicon-128.png" alt="" width="56" height="56" style="border-radius:12px;">
+            <div style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.02em;">Companion</div>
+            <div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.15);border-top-color:#a78bfa;border-radius:50%;animation:splash-spin .8s linear infinite;"></div>
+            <style>@keyframes splash-spin{to{transform:rotate(360deg)}}</style>
+        </div>
+        <div id="main"></div>
+        <script>
+            // Must run after #main exists (it sits directly above).
+            (function () {
+                var splash = document.getElementById("splash");
+                var main = document.getElementById("main");
+                var observer = new MutationObserver(function () {
+                    if (main.childElementCount > 0) {
+                        observer.disconnect();
+                        splash.style.opacity = "0";
+                        setTimeout(function () { splash.remove(); }, 350);
+                    }
+                });
+                observer.observe(main, { childList: true });
+            })();
+        </script>
+    </body>
+</html>

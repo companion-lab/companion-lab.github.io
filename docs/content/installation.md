@@ -44,9 +44,10 @@ chmod +x companion
 On the first run Companion:
 
 1. Shows your avatar as a transparent overlay on the desktop.
-2. Seeds the bundled feature plugins (chat, voice, alarms, calendar, MCP
-   tools, VRM avatar) into the app data folder — they ship pre-installed and
-   can be removed any time in **Settings → Plugins**.
+2. Seeds the bundled feature plugins (chat, voice — speech-to-text and
+   speech synthesis, alarms, calendar, MCP tools, Live2D and VRM avatars)
+   into the app data folder — they ship pre-installed and can be removed any
+   time in **Settings → Plugins**.
 3. Opens the settings window so you can connect an AI provider.
 
 ## 4. Connect an AI provider

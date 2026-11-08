@@ -82,7 +82,7 @@ fn CodeBlock(lang: String, code: String) -> Element {
             div {
                 class: "flex items-center justify-between bg-white/5 px-4 py-2",
                 span {
-                    class: "text-xs font-medium uppercase tracking-wider text-gray-500",
+                    class: "text-xs font-medium uppercase tracking-wider text-gray-400",
                     if lang.is_empty() { "code" } else { "{lang}" }
                 }
                 button {
@@ -300,7 +300,7 @@ fn parse_inline(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
                 *cursor += 1;
                 let inner = parse_inline(events, cursor);
                 flush_text(&mut text, &mut out);
-                out.push(rsx! { del { class: "text-gray-500 line-through", for element in inner { {element} } } });
+                out.push(rsx! { del { class: "text-gray-400 line-through", for element in inner { {element} } } });
             }
             Event::Start(Tag::Link { dest_url, .. }) => {
                 *cursor += 1;
@@ -395,7 +395,7 @@ fn parse_list_items(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
                                 class: if state {
                                     "fa-solid fa-square-check mr-2 text-purple-400"
                                 } else {
-                                    "fa-regular fa-square mr-2 text-gray-600"
+                                    "fa-regular fa-square mr-2 text-gray-400"
                                 },
                                 "aria-hidden": "true",
                             }

@@ -36,11 +36,10 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      # Pages serves project sites at https://<owner>.github.io/<repo>/, so all
-      # asset URLs must be prefixed with the repo name. When switching to a
-      # custom domain, drop the --base-path flag from the build step.
-      - name: Compute base path
-        run: echo "BASE_PATH=/${GITHUB_REPOSITORY#*/}" >> "$GITHUB_ENV"
+      # Deployed from the root-domain repo (<owner>.github.io), so the site is
+      # served at https://<owner>.github.io/ and asset URLs need no prefix.
+      # If this workflow ever runs in a project repo, add
+      # --base-path "/${GITHUB_REPOSITORY#*/}" to the build step below.
 
       # Prebuilt CLI from the Dioxus release (a cargo install takes ~6 min).
       # Keep this version in sync with `dioxus` in Cargo.toml.
@@ -53,7 +52,7 @@ jobs:
           dx --version
 
       - name: Build static web app
-        run: dx build @client --web --release --base-path "$BASE_PATH"
+        run: dx build @client --web --release
 
       - name: Prepare Pages artifact
         working-directory: target/dx/companion-landing-page/release/web/public
@@ -62,6 +61,9 @@ jobs:
           # boots the app and lets the router render the catch-all route.
           cp index.html 404.html
           touch .nojekyll
+          # dx drops a backup of the custom index.html template next to the
+          # output; don't ship it.
+          rm -f index.html.bak
 
       - uses: actions/configure-pages@v5
         with:

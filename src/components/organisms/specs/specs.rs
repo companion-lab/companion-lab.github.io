@@ -34,7 +34,7 @@ pub fn Specs() -> Element {
                             li { class: "flex items-start gap-3 text-gray-300", i { class: "fa-solid fa-arrow-right text-purple-400 mt-1" } " \"look angry\" → sets the angry expression" }
                             li { class: "flex items-start gap-3 text-gray-300", i { class: "fa-solid fa-arrow-right text-purple-400 mt-1" } " Tags are stripped before the text is spoken" }
                         }
-                        p { class: "text-xs text-gray-500 mt-6", "Motion names come from three built-ins plus every clip you import; the model is told the full list on every request, so custom clip names work as soon as they're imported." }
+                        p { class: "text-xs text-gray-400 mt-6", "Motion names come from three built-ins plus every clip you import; the model is told the full list on every request, so custom clip names work as soon as they're imported." }
                     }
 
                     // Right: Tech Specs

@@ -34,11 +34,11 @@ pub fn Hero() -> Element {
                     }
                     DownloadButtons { centered: false }
                     p {
-                        class: "text-xs text-gray-500 mt-2",
+                        class: "text-xs text-gray-400 mt-2",
                         "Desktop build via Tauri v2. Requires models: pnpm models + Moonshine STT."
                     }
                     p {
-                        class: "text-xs text-gray-500 mt-4",
+                        class: "text-xs text-gray-400 mt-4",
                         i { class: "fa-solid fa-shield-check mr-1" }
                         " Tauri v2 desktop shell. OpenAI / Anthropic / Gemini providers."
                     }
@@ -60,7 +60,7 @@ pub fn Hero() -> Element {
                             div {
                                 id: "hero-vrm-loading",
                                 class: "absolute inset-0 flex items-center justify-center",
-                                span { class: "text-xs text-gray-500 tracking-widest uppercase animate-pulse", "Loading avatar..." }
+                                span { class: "text-xs text-gray-400 tracking-widest uppercase animate-pulse", "Loading avatar..." }
                             }
                             div {
                                 id: "hero-vrm-fallback",
@@ -87,7 +87,7 @@ mod vrm {
     // assets/vrma/ at compile time.
     include!(concat!(env!("OUT_DIR"), "/vrma_list.rs"));
 
-    const IMPORTMAP: &str = r#"{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js","@pixiv/three-vrm-animation":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm-animation@3/lib/three-vrm-animation.module.min.js"}}"#;
+    const IMPORTMAP: &str = r#"{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/","@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3/lib/three-vrm.module.min.js","@pixiv/three-vrm-animation":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm-animation@3/lib/three-vrm-animation.module.min.js"}}"#;
 
     const MODULE_JS: &str = r#"
 import * as THREE from 'three';

@@ -38,8 +38,9 @@ my-plugin/
   separator qualifies tool names as `{id}__{tool}`).
 - `abi` — must match the host ABI (currently `2`). Plugins built against an
   older SDK are refused at load time.
-- `permissions` — declarative in v1: `storage`, `events`, `tools`. Storage
-  namespacing and tool routing are enforced; the rest is informational.
+- `permissions` — declarative in v1: `storage`, `events`, `tools`,
+  `secrets`. Storage namespacing and tool routing are enforced; the rest is
+  informational. The declared list is shown in **Settings → Plugins**.
 - `frontend` and `backend` are both optional — a plugin can be
   frontend-only, backend-only, or both.
 
@@ -77,9 +78,10 @@ export default definePlugin((ctx) => {
 | --- | --- |
 | `settings.registerTab` / `overrideTab` | Add or replace a settings tab |
 | `settings.registerSection` / `replaceSection` | Insert into or replace sections of existing tabs |
-| `main.registerWidget` / `overrideWidget` | Add or replace widgets in the avatar window |
+| `main.registerWidget` / `overrideWidget` | Add or replace widgets in the avatar window — slots `main.backdrop`, `main.top`, `main.bottom`, `main.overlay` |
 | `main.registerContextMenuItem` | Entries in the avatar's context menu |
 | `tools.register` | A tool the avatar's model can call |
+| `systemPrompt.register` | Contribute instruction text to the chat system prompt (live across turns while the plugin is enabled) |
 | `backend.call(method, payload)` | Call the plugin's Rust backend |
 | `events.on` / `events.emit` | Namespaced event bus |
 | `storage.get/set/remove` | Namespaced key/value storage |
@@ -87,11 +89,13 @@ export default definePlugin((ctx) => {
 | `services` | Register or consume TTS/STT engines |
 | `secrets.set/get/remove` | OS-keychain secrets scoped to the plugin |
 | `ui` | The host's UI kit so plugins match the app design |
+| `useSettingsState()` | Imported from the SDK — read/write the real settings-page state inside a settings tab or section |
 
-The reference implementation covering every extension point is the
-`notes-plugin` example in the repository (see `examples/notes-plugin`),
-and the official feature plugins live at
-https://github.com/companion-lab (e.g. `companion-plugin-alarms`).
+The official feature plugins — alarms, calendar, chat, Live2D avatar, MCP,
+STT, TTS, and VRM — are working reference implementations at
+https://github.com/companion-lab (e.g. `companion-plugin-alarms`). They ship
+with the app, so **Settings → Plugins** doubles as a gallery of real-world
+plugin code.
 
 ## Backend (Rust, optional)
 
@@ -109,6 +113,8 @@ impl Plugin for MyBackend {
     fn init(&mut self, ctx: PluginCtx) -> Result<(), String> {
         // Writable per-plugin dir: {app_data}/plugins-data/{id}/
         let data_dir = ctx.data_dir().ok_or("no data dir")?;
+        // Read-only package dir (manifest, bundles, bundled assets/):
+        let _package_dir = ctx.plugin_dir();
         std::fs::create_dir_all(&data_dir).map_err(|e| e.to_string())?;
         ctx.info("ready");
         Ok(())
@@ -146,6 +152,9 @@ A few ABI-safety rules worth knowing:
 - The host checks the ABI version before calling anything.
 - Every call into the dylib is wrapped in `catch_unwind` — a panicking
   backend degrades to "every call errors" instead of crashing the app.
+- `tools()` is queried live on every tool-list refresh, so dynamic tool sets
+  (e.g. an MCP plugin whose servers connect over time) stay current. Keep it
+  fast: read a cache, never block on I/O.
 - Backends are never unloaded while the app runs; disabling a plugin only
   stops routing calls to it. Fully unloading needs an app restart.
 
@@ -191,13 +200,10 @@ node plugin-cli/bin/companion-cli.mjs build my-plugin
 
 esbuild is resolved from the CLI's own dependencies (or `app/node_modules` as
 a fallback), so the CLI works even without the install step. The frontend is
-bundled with
-esbuild (React is aliased to the host's copies via the SDK shims — never
-bundled). The Rust backend is built with `cargo build --release` whenever
-`backend/` and `manifest.backend` both exist; use `--no-backend` to skip it.
-esbuild (React is aliased to the host's copies via the SDK shims — never
-bundled). The Rust backend is built with `cargo build --release` whenever
-`backend/` and `manifest.backend` both exist; use `--no-backend` to skip it.
+bundled with esbuild (React is aliased to the host's copies via the SDK
+shims — never bundled). The Rust backend is built with `cargo build
+--release` whenever `backend/` and `manifest.backend` both exist; use
+`--no-backend` to skip it.
 
 ### CLI options
 
@@ -208,7 +214,7 @@ bundled). The Rust backend is built with `cargo build --release` whenever
 | `--flat` | Put `manifest.json` at the zip root instead of inside an `<id>/` folder — the importer accepts both layouts |
 | `--no-backend` | Skip the Rust build even if `backend/` exists |
 | `--no-frontend` | Skip the JS bundle (backend-only plugin) |
-| `--sdk <dir>` | Path to the plugin JS SDK (default resolves from `node_modules/@companion-lab/plugin`) |
+| `--sdk <dir>` | Path to the plugin JS SDK (defaults to the shims bundled with the CLI; inside a companion-tauri checkout, the repo's own `sdk/js/@companion/plugin`) |
 
 Zip entries use a fixed timestamp, so identical inputs produce
 byte-identical archives.
@@ -227,15 +233,3 @@ notes/
 
 or the flat layout from `--flat` (`manifest.json` at the zip root).
 
-### The fast dev loop
-
-While iterating inside the repository, skip the zip entirely and build the
-unpacked package into the dev staging directory:
-
-```bash
-node app/scripts/build-plugin.mjs examples/notes-plugin --backend --out plugins/notes
-```
-
-That script is a thin wrapper over the same build logic that powers the
-CLI. Debug builds discover plugins in the repo's `plugins/` staging
-directory automatically.
