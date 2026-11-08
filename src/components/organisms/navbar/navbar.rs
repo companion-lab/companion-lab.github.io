@@ -2,13 +2,11 @@ use dioxus::prelude::*;
 
 use crate::{
     components::atoms::{IconButton, NavLink, NavLinkVariant},
+    config::{DISCORD_URL, GITHUB_URL},
     route::Route,
 };
 
 const LOGO_IMAGE: Asset = asset!("/assets/icon.png");
-
-const GITHUB_URL: &str = "https://github.com/companion-vr";
-const DISCORD_URL: &str = "https://discord.gg/G46H7B9x";
 
 const NAV_ITEMS: [(&str, &str); 3] = [
     ("#features", "Features"),

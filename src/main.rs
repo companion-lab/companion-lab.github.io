@@ -1,4 +1,5 @@
 mod components;
+mod config;
 mod pages;
 mod route;
 

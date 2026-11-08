@@ -1,8 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::components::atoms::{ActionButton, ButtonVariant};
-
-const RELEASES_URL: &str = "https://github.com/companion/companion/releases/latest";
+use crate::{
+    components::atoms::{ActionButton, ButtonVariant},
+    config::RELEASES_URL,
+};
 
 /// Platform download buttons, with the detected platform first and highlighted.
 ///

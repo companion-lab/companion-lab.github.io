@@ -5,11 +5,9 @@ use crate::{
         atoms::IconButton,
         molecules::{FooterColumn, FooterLink},
     },
+    config::{DISCORD_URL, GITHUB_URL},
     route::Route,
 };
-
-const GITHUB_URL: &str = "https://github.com/companion-vr";
-const DISCORD_URL: &str = "https://discord.gg/G46H7B9x";
 
 #[component]
 pub fn Footer() -> Element {
