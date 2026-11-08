@@ -1,9 +1,12 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{scroll_to_id, AmbientBackground, Footer, MarkdownView},
+    components::{AmbientBackground, Footer, MarkdownView},
     route::Route,
 };
+// Only used by the wasm-only hash-scroll retry below; unused on the server.
+#[cfg(target_arch = "wasm32")]
+use crate::components::scroll_to_id;
 
 /// One documentation article.
 pub struct DocArticle {

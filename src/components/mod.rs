@@ -9,6 +9,7 @@ mod atoms;
 mod molecules;
 mod organisms;
 
+// molecules has no glob re-export: its users all import through
+// `components::molecules::…`, so a re-export here would be dead code.
 pub use atoms::*;
-pub use molecules::*;
 pub use organisms::*;

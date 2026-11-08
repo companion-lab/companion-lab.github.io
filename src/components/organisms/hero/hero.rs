@@ -2,6 +2,9 @@ use dioxus::prelude::*;
 
 use crate::components::molecules::DownloadButtons;
 
+// Only referenced by the wasm-only module injection below (the static
+// client build); unused in native checks.
+#[cfg(target_arch = "wasm32")]
 const DEMO_MODEL: Asset = asset!("/assets/model/demo.glb");
 
 #[component]

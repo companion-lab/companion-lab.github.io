@@ -5,7 +5,7 @@ use crate::{
         atoms::IconButton,
         molecules::{FooterColumn, FooterLink},
     },
-    config::{DISCORD_URL, GITHUB_URL},
+    config::{COMMUNITY_GITHUB_URL, DISCORD_URL},
     route::Route,
 };
 
@@ -15,34 +15,86 @@ pub fn Footer() -> Element {
         (
             "Docs",
             vec![
-                FooterLink { label: "Installation", href: "/docs/installation", external: false },
-                FooterLink { label: "Usage", href: "/docs/usage", external: false },
-                FooterLink { label: "Creating plugins", href: "/docs/creating-plugins", external: false },
-                FooterLink { label: "Troubleshooting", href: "/docs/troubleshooting", external: false },
+                FooterLink {
+                    label: "Installation",
+                    href: "/docs/installation",
+                    external: false,
+                },
+                FooterLink {
+                    label: "Usage",
+                    href: "/docs/usage",
+                    external: false,
+                },
+                FooterLink {
+                    label: "Creating plugins",
+                    href: "/docs/creating-plugins",
+                    external: false,
+                },
+                FooterLink {
+                    label: "Troubleshooting",
+                    href: "/docs/troubleshooting",
+                    external: false,
+                },
             ],
         ),
         (
             "Product",
             vec![
-                FooterLink { label: "Download", href: "#download", external: false },
-                FooterLink { label: "Features", href: "#features", external: false },
-                FooterLink { label: "Settings", href: "#", external: false },
+                FooterLink {
+                    label: "Download",
+                    href: "#download",
+                    external: false,
+                },
+                FooterLink {
+                    label: "Features",
+                    href: "#features",
+                    external: false,
+                },
+                FooterLink {
+                    label: "Settings",
+                    href: "#",
+                    external: false,
+                },
             ],
         ),
         (
             "Tech",
             vec![
-                FooterLink { label: "Tauri v2", href: "https://github.com/tauri-apps/tauri", external: true },
-                FooterLink { label: "Three.js", href: "https://github.com/mrdoob/three.js", external: true },
-                FooterLink { label: "Moonshine", href: "https://github.com/moonshine-ai/moonshine", external: true },
-                FooterLink { label: "Supertonic", href: "https://github.com/supertone-oss-archive/supertonic", external: true },
+                FooterLink {
+                    label: "Tauri v2",
+                    href: "https://github.com/tauri-apps/tauri",
+                    external: true,
+                },
+                FooterLink {
+                    label: "Three.js",
+                    href: "https://github.com/mrdoob/three.js",
+                    external: true,
+                },
+                FooterLink {
+                    label: "Moonshine",
+                    href: "https://github.com/moonshine-ai/moonshine",
+                    external: true,
+                },
+                FooterLink {
+                    label: "Supertonic",
+                    href: "https://github.com/supertone-oss-archive/supertonic",
+                    external: true,
+                },
             ],
         ),
         (
             "Legal",
             vec![
-                FooterLink { label: "Privacy", href: "#", external: false },
-                FooterLink { label: "Terms", href: "#", external: false },
+                FooterLink {
+                    label: "Privacy",
+                    href: "#",
+                    external: false,
+                },
+                FooterLink {
+                    label: "Terms",
+                    href: "#",
+                    external: false,
+                },
             ],
         ),
     ];
@@ -65,7 +117,7 @@ pub fn Footer() -> Element {
                         p { class: "text-sm text-gray-400 mb-6", "A transparent VRM avatar on your desktop — the visual body of your AI agent." }
                         div {
                             class: "flex gap-4",
-                            IconButton { href: GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                            IconButton { href: COMMUNITY_GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
                             IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                         }
                     }

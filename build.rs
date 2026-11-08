@@ -7,7 +7,7 @@ use std::path::Path;
 /// `.env` value, then the hardcoded default. The defaults also cover CI
 /// builds (GitHub Pages) that run without a `.env`.
 const SITE_LINKS: [(&str, &str); 3] = [
-    ("GITHUB_URL", "https://github.com/companion-vr"),
+    ("COMMUNITY_GITHUB_URL", "https://github.com/companion-vr"),
     ("DISCORD_URL", "https://discord.gg/G46H7B9x"),
     (
         "RELEASES_URL",
@@ -65,11 +65,7 @@ fn main() {
     // list is empty when no clips exist.
     let decls: String = names
         .iter()
-        .map(|name| {
-            format!(
-                "    dioxus::prelude::asset!(\"/assets/vrma/{name}\").to_string(),\n"
-            )
-        })
+        .map(|name| format!("    dioxus::prelude::asset!(\"/assets/vrma/{name}\").to_string(),\n"))
         .collect();
 
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR is set by cargo");

@@ -51,6 +51,22 @@ jobs:
           install -m 755 dx /usr/local/bin/dx
           dx --version
 
+      # build.rs resolves the site links from a `.env` at the workspace root
+      # (gitignored, so it never reaches CI). Regenerate it here from
+      # repository variables — public URLs, not secrets, so `vars.*` is fine.
+      # Unset variables are skipped and build.rs falls back to its defaults.
+      - name: Create .env from repository variables
+        env:
+          COMMUNITY_GITHUB_URL: ${{ vars.COMMUNITY_GITHUB_URL }}
+          DISCORD_URL: ${{ vars.DISCORD_URL }}
+          RELEASES_URL: ${{ vars.RELEASES_URL }}
+        run: |
+          : > .env
+          for key in COMMUNITY_GITHUB_URL DISCORD_URL RELEASES_URL; do
+            value="${!key}"
+            [ -n "$value" ] && printf '%s=%s\n' "$key" "$value" >> .env
+          done
+
       - name: Build static web app
         run: dx build @client --web --release
 

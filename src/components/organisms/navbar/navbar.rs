@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::atoms::{IconButton, NavLink, NavLinkVariant},
-    config::{DISCORD_URL, GITHUB_URL},
+    config::{COMMUNITY_GITHUB_URL, DISCORD_URL},
     route::Route,
 };
 
@@ -53,7 +53,7 @@ pub fn Navbar() -> Element {
                     }
                     div {
                         class: "flex gap-4",
-                        IconButton { href: GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                        IconButton { href: COMMUNITY_GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
                         IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                     }
                 }
@@ -87,7 +87,7 @@ pub fn Navbar() -> Element {
                     }
                     div {
                         class: "flex gap-4 pt-4 border-t border-white/10",
-                        IconButton { href: GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                        IconButton { href: COMMUNITY_GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
                         IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                     }
                 }

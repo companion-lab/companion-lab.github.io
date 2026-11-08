@@ -25,14 +25,15 @@ pub static SECTION_SCROLL_TARGET: GlobalSignal<Option<&'static str>> =
 /// page during navigation), which would leave the user at the wrong place.
 /// The element's `scroll-margin-top` (see `main.css`) still clears the fixed
 /// navbar.
+#[cfg_attr(not(target_arch = "wasm32"), allow(unused_variables))]
 pub fn scroll_to_id(id: &str) {
     #[cfg(target_arch = "wasm32")]
     if let Some(element) = web_sys::window()
         .and_then(|w| w.document())
         .and_then(|d| d.get_element_by_id(id))
     {
-        let mut options = web_sys::ScrollIntoViewOptions::new();
-        options.behavior(web_sys::ScrollBehavior::Instant);
+        let options = web_sys::ScrollIntoViewOptions::new();
+        options.set_behavior(web_sys::ScrollBehavior::Instant);
         element.scroll_into_view_with_scroll_into_view_options(&options);
     }
 }

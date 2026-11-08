@@ -16,7 +16,7 @@
 //! at runtime instead.
 
 /// GitHub organization URL (navbar + footer icon buttons).
-pub const GITHUB_URL: &str = env!("GITHUB_URL");
+pub const COMMUNITY_GITHUB_URL: &str = env!("COMMUNITY_GITHUB_URL");
 
 /// Discord invite URL (navbar + footer icon buttons).
 pub const DISCORD_URL: &str = env!("DISCORD_URL");
