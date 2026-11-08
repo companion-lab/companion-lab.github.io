@@ -64,7 +64,12 @@ jobs:
           : > .env
           for key in COMMUNITY_GITHUB_URL DISCORD_URL RELEASES_URL; do
             value="${!key}"
-            [ -n "$value" ] && printf '%s=%s\n' "$key" "$value" >> .env
+            # `if` rather than `[ … ] && …` — under `bash -e`, an empty
+            # variable would make the failed test the loop's exit status
+            # and abort the step.
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$key" "$value" >> .env
+            fi
           done
 
       - name: Build static web app
