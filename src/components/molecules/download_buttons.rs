@@ -1,3 +1,4 @@
+use crate::components::atoms::Icon;
 use dioxus::prelude::*;
 
 use crate::{
@@ -45,9 +46,9 @@ pub fn DownloadButtons(centered: bool) -> Element {
     };
 
     let platforms: [(i32, &str, &str); 3] = [
-        (0, "fa-brands fa-windows", "Windows"),
-        (1, "fa-brands fa-apple", "macOS"),
-        (2, "fa-brands fa-linux", "Linux"),
+        (0, "windows", "Windows"),
+        (1, "apple", "macOS"),
+        (2, "linux", "Linux"),
     ];
     let mut ordered = platforms.to_vec();
     ordered.sort_by(|a, b| (a.0 != detected).cmp(&(b.0 != detected)));
@@ -66,7 +67,7 @@ pub fn DownloadButtons(centered: bool) -> Element {
                     variant: if code == detected { ButtonVariant::Primary } else { ButtonVariant::Glass },
                     href: RELEASES_URL,
                     class: "w-full sm:w-auto",
-                    i { class: "{icon} text-xl group-hover:-translate-y-1 transition-transform" }
+                    Icon { icon, class: "text-xl group-hover:-translate-y-1 transition-transform" }
                     span { "{label}" }
                 }
             }

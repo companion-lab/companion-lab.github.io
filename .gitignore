@@ -8,3 +8,8 @@
 
 # Local environment config (copy .env.example to .env)
 .env
+
+# Tailwind build output — dx generates public/tailwind.css at build time
+# (it is linked statically from index.html, so it must exist in the served
+# artifact but not in the repo).
+/public/tailwind.css

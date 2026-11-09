@@ -1,5 +1,9 @@
 [application]
 
+# Tailwind: built straight into public/ (unhashed) so index.html can link it
+# statically — the prerendered SSG pages must be styled before the wasm boots.
+tailwind_output = "public/tailwind.css"
+
 [web.app]
 
 # HTML title tag content

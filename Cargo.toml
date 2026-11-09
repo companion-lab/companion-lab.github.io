@@ -6,6 +6,15 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+# Smaller, faster-booting wasm: every byte shaved here is compile +
+# instantiate time off the main thread on first load.
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
 [dependencies]
 # `fullstack` is enabled by the `server` feature (not unconditionally): a
 # fullstack client expects server-rendered hydration data and crashes with

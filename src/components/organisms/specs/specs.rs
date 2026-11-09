@@ -21,7 +21,7 @@ fn CommandRow(command: &'static str, result: &'static str) -> Element {
             class: "flex flex-wrap items-baseline gap-x-2 px-4 py-2.5 font-mono text-xs sm:text-sm",
             span { class: "text-purple-400", "[>]" }
             span { class: "text-gray-200", "{command}" }
-            span { class: "text-gray-500", "→ {result}" }
+            span { class: "text-gray-400", "→ {result}" }
         }
     }
 }
@@ -42,7 +42,7 @@ pub fn Specs() -> Element {
                         div {
                             class: "flex items-center justify-between gap-4 border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
                             span { "mod.02 // behavior" }
-                            span { class: "text-gray-500", "mcp + inline tags" }
+                            span { class: "text-gray-400", "mcp + inline tags" }
                         }
                         h2 {
                             class: "mt-8 text-3xl md:text-5xl font-black uppercase tracking-tight text-white",
@@ -62,7 +62,7 @@ pub fn Specs() -> Element {
                             CommandRow { command: "inline tags", result: "stripped before the text is spoken" }
                         }
                         p {
-                            class: "mt-6 font-mono text-[11px] uppercase tracking-[0.15em] leading-relaxed text-gray-500",
+                            class: "mt-6 font-mono text-[11px] uppercase tracking-[0.15em] leading-relaxed text-gray-400",
                             "// motion names come from three built-ins plus every clip you import — the model is told the full list on every request, so custom clip names work as soon as they're imported"
                         }
                     }
@@ -74,7 +74,7 @@ pub fn Specs() -> Element {
                             h3 {
                                 class: "mb-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
                                 span { "sys.spec // readout" }
-                                span { class: "text-gray-500", "7 entries" }
+                                span { class: "text-gray-400", "7 entries" }
                             }
                             ul {
                                 class: "divide-y divide-white/5",
