@@ -23,10 +23,23 @@ manually from the
 
 Install instructions differ slightly per platform:
 
-**macOS** — open the downloaded `.dmg` (or `.app`), and drag Companion into
-`Applications`. If macOS warns that the app is from an unidentified
-developer, **right-click** the app and choose **Open**, then confirm. This
-appears for builds that aren't signed with an Apple developer certificate.
+**macOS** — open the downloaded `.dmg` and drag Companion into
+`Applications`. Since the current builds are not signed with an Apple
+Developer ID, the first launch may show *"Apple could not verify
+'companion'…"* — the right-click → Open trick no longer exists on recent
+macOS. Instead:
+
+1. Click **Done** on the warning dialog.
+2. Open **System Settings → Privacy & Security**, scroll to the **Security**
+   section, find the *"companion" was blocked* entry and click
+   **Allow Anyway** (authenticate when asked), then relaunch the app — the
+   approval sticks for subsequent launches.
+
+If the entry never appears, clear the downloads quarantine manually:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/companion.app
+```
 
 **Windows** — run the downloaded installer or executable. If Windows
 SmartScreen shows a warning for an unsigned build, click **More info → Run
