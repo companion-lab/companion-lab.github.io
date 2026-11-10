@@ -73,20 +73,17 @@ jobs:
           done
 
       - name: Build static web app
-        run: dx build --fullstack --ssg --release
-
-      # The client build's asset copy races the server phase's SSG run and
-      # can overwrite public/index.html with the raw template; the finalize
-      # step re-renders every route through the built server's incremental
-      # renderer and collapses the prerendered 404 page into the SPA
-      # fallback file GitHub Pages serves.
-      - name: Finalize SSG output
-        run: ./scripts/ssg-finalize.sh
+        run: dx build @client --web --release
 
       - name: Prepare Pages artifact
         working-directory: target/dx/companion-landing-page/release/web/public
         run: |
+          # SPA fallback: GitHub Pages serves 404.html for unknown paths, which
+          # boots the app and lets the router render the catch-all route.
+          cp index.html 404.html
           touch .nojekyll
+          # dx drops a backup of the custom index.html template next to the
+          # output; don't ship it.
           rm -f index.html.bak
 
       - uses: actions/configure-pages@v5

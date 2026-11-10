@@ -30,7 +30,7 @@ pub fn Cta() -> Element {
                         p { class: "mt-5 text-lg sm:text-xl text-gray-300", "Download for your platform and run the setup." }
                         div { class: "mt-10", DownloadButtons { centered: true } }
                         p {
-                            class: "mt-8 font-mono text-[11px] uppercase tracking-[0.15em] text-gray-400",
+                            class: "mt-8 font-mono text-[11px] uppercase tracking-[0.15em] text-gray-500",
                             "new here? read the "
                             Link {
                                 to: Route::Docs {},

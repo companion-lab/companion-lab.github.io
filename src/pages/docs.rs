@@ -1,4 +1,3 @@
-use crate::components::Icon;
 use dioxus::prelude::*;
 
 use crate::{
@@ -93,7 +92,7 @@ fn DocsView(slug: Option<String>) -> Element {
                     div {
                         class: "flex items-center justify-between gap-4 border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
                         span { "cmp://docs-dossier" }
-                        span { class: "flex items-center gap-2 text-gray-400",
+                        span { class: "flex items-center gap-2 text-gray-500",
                             span { class: "hud-dot", "aria-hidden": "true" }
                             "{DOC_ARTICLES.len()} records · live document"
                         }
@@ -138,7 +137,7 @@ fn DocsView(slug: Option<String>) -> Element {
                             div {
                                 class: "mb-8 flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
                                 span { "doc // {slug_label}" }
-                                span { class: "flex items-center gap-2 text-gray-400",
+                                span { class: "flex items-center gap-2 text-gray-500",
                                     span { class: "hud-dot", "aria-hidden": "true" }
                                     "markdown // embedded"
                                 }
@@ -148,7 +147,7 @@ fn DocsView(slug: Option<String>) -> Element {
                                 Some(article) => rsx! {
                                     MarkdownView { markdown: article.markdown }
                                     p {
-                                        class: "-mt-2 mb-8 font-mono text-[11px] uppercase tracking-[0.15em] text-gray-400",
+                                        class: "-mt-2 mb-8 font-mono text-[11px] uppercase tracking-[0.15em] text-gray-500",
                                         "// {article.description}"
                                     }
 
@@ -159,7 +158,7 @@ fn DocsView(slug: Option<String>) -> Element {
                                                 Link {
                                                     to: Route::DocsArticle { slug: article.slug.to_string() },
                                                     class: "flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-gray-400 transition-colors hover:text-purple-300",
-                                                    Icon { icon: "arrow-left", class: "text-[10px]" }
+                                                    i { class: "fa-solid fa-arrow-left text-[10px]", "aria-hidden": "true" }
                                                     "prev // {article.title}"
                                                 }
                                             },
@@ -171,7 +170,7 @@ fn DocsView(slug: Option<String>) -> Element {
                                                     to: Route::DocsArticle { slug: article.slug.to_string() },
                                                     class: "flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-gray-400 transition-colors hover:text-purple-300 sm:text-right",
                                                     "next // {article.title}"
-                                                    Icon { icon: "arrow-right", class: "text-[10px]" }
+                                                    i { class: "fa-solid fa-arrow-right text-[10px]", "aria-hidden": "true" }
                                                 }
                                             },
                                             None => rsx! { span {} },
@@ -184,7 +183,7 @@ fn DocsView(slug: Option<String>) -> Element {
                                     Link {
                                         to: Route::Docs {},
                                         class: "font-mono text-[11px] uppercase tracking-[0.15em] text-purple-400 transition-colors hover:text-purple-300",
-                                        Icon { icon: "arrow-left", class: "mr-2 text-[10px]" }
+                                        i { class: "fa-solid fa-arrow-left mr-2 text-[10px]", "aria-hidden": "true" }
                                         "back to the documentation"
                                     }
                                 }

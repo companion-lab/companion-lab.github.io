@@ -17,26 +17,6 @@
         <link rel="icon" type="image/x-icon" href="/{base_path}/favicon.ico">
         <link rel="apple-touch-icon" href="/{base_path}/icon.png">
 
-        <!-- Stylesheets are static (unhashed, from public/) so the prerendered
-             SSG pages paint fully styled before the wasm boots: the LCP is the
-             prerendered hero text and the wasm hydrates it afterwards. -->
-        <link rel="stylesheet" href="/{base_path}/main.css">
-        <link rel="stylesheet" href="/{base_path}/tailwind.css">
-
-        <!-- Fonts — only the weights the UI uses. The stylesheet loads
-             non-blocking (media=print swap): it is third-party, so making the
-             first paint wait on it would push FCP/LCP past the entire wasm
-             boot on slow connections. display=swap keeps text painting in the
-             fallback face while the files load. -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
-        <noscript>
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        </noscript>
-        <!-- Icons are inline SVGs (components::atoms::Icon) — no FontAwesome
-             webfont stylesheet (render-blocking, ~100 KB, 90% unused). -->
-
         <!-- Social preview cards -->
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="Companion">
@@ -56,15 +36,35 @@
         <meta name="twitter:image" content="https://companion-lab.github.io/{base_path}/icon.png">
     </head>
     <body>
-        <!-- The wasm hydrates the prerendered markup, so the real content
-             paints from HTML — no splash needed. -->
+        <!-- Instant-paint splash: the app bundle (wasm) takes a while to boot,
+             so paint something on-brand first. Removed as soon as Dioxus
+             mounts children into #main. -->
+        <div id="splash" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#05010f;font-family:system-ui,-apple-system,sans-serif;transition:opacity .3s ease;">
+            <img src="/{base_path}/favicon-128.png" alt="" width="56" height="56" style="border-radius:12px;">
+            <div style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.02em;">Companion</div>
+            <div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.15);border-top-color:#a78bfa;border-radius:50%;animation:splash-spin .8s linear infinite;"></div>
+            <style>@keyframes splash-spin{to{transform:rotate(360deg)}}</style>
+        </div>
         <div id="main"></div>
         <script>
-            // Stash the entry URL's hash before the WASM bundle runs: the
-            // router rewrites the URL to the canonical route (dropping the
-            // fragment) while booting, and first-load #section scrolls
-            // (see scroll_to_entry_hash) need the original.
-            window.__initialHash = window.location.hash;
+            // Must run after #main exists (it sits directly above).
+            (function () {
+                // Stash the entry URL's hash before the WASM bundle runs: the
+                // router rewrites the URL to the canonical route (dropping the
+                // fragment) while booting, and first-load #section scrolls
+                // (see scroll_to_entry_hash) need the original.
+                window.__initialHash = window.location.hash;
+                var splash = document.getElementById("splash");
+                var main = document.getElementById("main");
+                var observer = new MutationObserver(function () {
+                    if (main.childElementCount > 0) {
+                        observer.disconnect();
+                        splash.style.opacity = "0";
+                        setTimeout(function () { splash.remove(); }, 350);
+                    }
+                });
+                observer.observe(main, { childList: true });
+            })();
         </script>
     </body>
 </html>

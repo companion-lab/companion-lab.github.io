@@ -1,15 +1,12 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::atoms::{Icon, IconButton, NavLink, NavLinkVariant},
+    components::atoms::{IconButton, NavLink, NavLinkVariant},
     config::{COMMUNITY_GITHUB_URL, DISCORD_URL},
     route::Route,
 };
 
-// The 128px rendition: the nav displays it at 40-48px, so serving
-// the 512px icon.png would triple the bytes for no visible gain
-// (Lighthouse image-size-responsive).
-const LOGO_IMAGE: Asset = asset!("/assets/logo-128.png");
+const LOGO_IMAGE: Asset = asset!("/assets/icon.png");
 
 const NAV_ITEMS: [(&str, &str); 3] = [
     ("#features", "Features"),
@@ -20,7 +17,6 @@ const NAV_ITEMS: [(&str, &str); 3] = [
 #[component]
 pub fn Navbar() -> Element {
     let mut menu_open = use_signal(|| false);
-    let toggle_icon = if menu_open() { "xmark" } else { "bars" };
 
     rsx! {
         header {
@@ -62,8 +58,8 @@ pub fn Navbar() -> Element {
                     }
                     div {
                         class: "flex gap-4",
-                        IconButton { href: COMMUNITY_GITHUB_URL, icon: "github", label: "GitHub" }
-                        IconButton { href: DISCORD_URL, icon: "discord", label: "Discord" }
+                        IconButton { href: COMMUNITY_GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                        IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                     }
                 }
 
@@ -72,7 +68,7 @@ pub fn Navbar() -> Element {
                     class: "md:hidden w-10 h-10 flex items-center justify-center text-gray-300 hover:text-white transition-colors",
                     "aria-label": "Toggle navigation menu",
                     onclick: move |_| menu_open.set(!menu_open()),
-                    Icon { icon: toggle_icon, class: "text-xl" }
+                    i { class: if menu_open() { "fa-solid fa-xmark text-xl" } else { "fa-solid fa-bars text-xl" } }
                 }
             }
 
@@ -102,15 +98,13 @@ pub fn Navbar() -> Element {
                     }
                     div {
                         class: "flex gap-4 pt-4 border-t border-white/10",
-                        IconButton { href: COMMUNITY_GITHUB_URL, icon: "github", label: "GitHub" }
-                        IconButton { href: DISCORD_URL, icon: "discord", label: "Discord" }
+                        IconButton { href: COMMUNITY_GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                        IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                     }
                 }
             }
         }
 
-        main {
-            Outlet::<Route> {}
-        }
+        Outlet::<Route> {}
     }
 }

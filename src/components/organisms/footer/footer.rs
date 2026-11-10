@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::{
-        atoms::{Icon, IconButton},
+        atoms::IconButton,
         molecules::{FooterColumn, FooterLink},
     },
     config::{COMMUNITY_GITHUB_URL, DISCORD_URL},
@@ -116,14 +116,14 @@ pub fn Footer() -> Element {
                         Link {
                             to: Route::Home {},
                             class: "flex items-center gap-2 mb-4",
-                            Icon { icon: "cube", class: "text-purple-400" }
+                            i { class: "fa-solid fa-cube text-purple-400" }
                             span { class: "text-xl font-bold text-white", "Companion" }
                         }
                         p { class: "text-sm text-gray-400 mb-6", "A transparent VRM avatar on your desktop — the visual body of your AI agent." }
                         div {
                             class: "flex gap-4",
-                            IconButton { href: COMMUNITY_GITHUB_URL, icon: "github", label: "GitHub" }
-                            IconButton { href: DISCORD_URL, icon: "discord", label: "Discord" }
+                            IconButton { href: COMMUNITY_GITHUB_URL, icon: "fab fa-github", label: "GitHub" }
+                            IconButton { href: DISCORD_URL, icon: "fab fa-discord", label: "Discord" }
                         }
                     }
                     for (title, links) in columns {
@@ -137,7 +137,7 @@ pub fn Footer() -> Element {
                         class: "flex gap-4",
                         span {
                             "Built with "
-                            Icon { icon: "heart", class: "text-purple-500/50 mx-1" }
+                            i { class: "fa-solid fa-heart text-purple-500/50 mx-1" }
                             " for the desktop."
                         }
                     }

@@ -6,7 +6,6 @@
 //! elements styled to match the site theme, instead of relying on an HTML
 //! push renderer.
 
-use crate::components::atoms::Icon;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::{prelude::Closure, JsCast};
 
@@ -77,10 +76,6 @@ fn CodeBlock(lang: String, code: String) -> Element {
         }
     };
 
-    let copy_icon = if copied() { "check" } else { "copy" };
-    let copy_class = if copied() { "text-green-400" } else { "" };
-    let copy_label = if copied() { "copied" } else { "copy" };
-
     rsx! {
         div {
             class: "my-6 overflow-hidden border border-white/10",
@@ -94,11 +89,11 @@ fn CodeBlock(lang: String, code: String) -> Element {
                     class: "flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 transition-colors hover:text-white",
                     "aria-label": "Copy code to clipboard",
                     onclick,
-                    Icon {
-                        icon: copy_icon,
-                        class: copy_class,
+                    i {
+                        class: if copied() { "fa-solid fa-check text-green-400" } else { "fa-regular fa-copy" },
+                        "aria-hidden": "true",
                     }
-                    "{copy_label}"
+                    if copied() { "copied" } else { "copy" }
                 }
             }
             pre {
@@ -393,17 +388,20 @@ fn parse_list_items(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
                     parse_blocks(events, cursor)
                 };
                 match checked {
-                    Some(state) => {
-                        let box_icon: &'static str = if state { "square-check" } else { "square" };
-                        let box_class: &'static str = if state { "mr-2 text-purple-400" } else { "mr-2 text-gray-400" };
-                        items.push(rsx! {
-                            li {
-                                class: "list-none",
-                                Icon { icon: box_icon, class: box_class },
-                                for element in content { {element} }
+                    Some(state) => items.push(rsx! {
+                        li {
+                            class: "list-none",
+                            i {
+                                class: if state {
+                                    "fa-solid fa-square-check mr-2 text-purple-400"
+                                } else {
+                                    "fa-regular fa-square mr-2 text-gray-400"
+                                },
+                                "aria-hidden": "true",
                             }
-                        });
-                    }
+                            for element in content { {element} }
+                        }
+                    }),
                     None => items.push(rsx! {
                         li { class: "pl-1 text-gray-300", for element in content { {element} } }
                     }),

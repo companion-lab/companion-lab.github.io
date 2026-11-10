@@ -1,6 +1,4 @@
-// `pub(crate)`: the SSG route list (src/server/mod.rs) enumerates the doc
-// slugs from docs::DOC_ARTICLES when prerendering.
-pub(crate) mod docs;
+mod docs;
 mod home;
 mod legal;
 mod not_found;

@@ -1,4 +1,3 @@
-use crate::components::Icon;
 use dioxus::prelude::*;
 
 use crate::{
@@ -38,7 +37,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "Chat",
         version: "0.1.0",
         description: "The avatar's AI conversation: provider chat with tool loop, streaming TTS/STT speech, wake word, clarifying questions, and the Persona/Connection settings sections.",
-        icon: "comments",
+        icon: "fa-comments",
         color: "purple",
         permissions: &["storage", "events", "tools", "secrets"],
         frontend: true,
@@ -50,7 +49,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "VRM Avatar",
         version: "0.1.0",
         description: "VRM avatar models (with the built-in demo asset), motion and emotion clips, and graphics settings.",
-        icon: "cube",
+        icon: "fa-cube",
         color: "blue",
         permissions: &["storage", "events"],
         frontend: true,
@@ -62,7 +61,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "Live2D Avatar",
         version: "0.1.0",
         description: "Live2D avatar for the desktop overlay: renders the bundled Cubism model and answers the avatar bus (chat emotions, TTS lip sync, click-through).",
-        icon: "masks-theater",
+        icon: "fa-masks-theater",
         color: "indigo",
         permissions: &["storage", "events", "tools"],
         frontend: true,
@@ -74,7 +73,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "Speech Recognition",
         version: "0.1.1",
         description: "On-device STT (Moonshine) + cloud transcription, with a Speech Recognition settings tab and the cloud STT endpoint card.",
-        icon: "microphone-lines",
+        icon: "fa-microphone-lines",
         color: "pink",
         permissions: &["events", "secrets", "microphone"],
         frontend: true,
@@ -86,7 +85,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "Speech Synthesis",
         version: "0.1.0",
         description: "On-device TTS (Supertonic) + cloud synthesis, with a Speech Synthesis settings tab and the cloud TTS endpoint card.",
-        icon: "volume-high",
+        icon: "fa-volume-high",
         color: "purple",
         permissions: &["events", "secrets"],
         frontend: true,
@@ -98,7 +97,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "Alarms",
         version: "0.1.0",
         description: "Timed alarms and reminders: a settings tab, the ringing banner, and alarm tools the avatar can call.",
-        icon: "bell",
+        icon: "fa-bell",
         color: "blue",
         permissions: &["storage", "events", "tools"],
         frontend: true,
@@ -110,7 +109,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "Calendar",
         version: "0.1.0",
         description: "Dated events, birthdays, and appointments: a settings tab, reminder banners, and calendar tools the avatar can call.",
-        icon: "calendar-days",
+        icon: "fa-calendar-days",
         color: "indigo",
         permissions: &["storage", "events", "tools"],
         frontend: true,
@@ -122,7 +121,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         name: "MCP Tools",
         version: "0.1.0",
         description: "Model Context Protocol client: connect MCP servers and expose their tools to the avatar.",
-        icon: "plug",
+        icon: "fa-plug",
         color: "pink",
         permissions: &["storage", "events", "tools"],
         frontend: true,
@@ -197,7 +196,7 @@ pub fn Plugins() -> Element {
                     div {
                         class: "flex items-center justify-between gap-4 border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
                         span { "mod // plugin registry" }
-                        span { class: "text-gray-400", "{PLUGIN_CATALOG.len()} modules loaded" }
+                        span { class: "text-gray-500", "{PLUGIN_CATALOG.len()} modules loaded" }
                     }
                     h1 {
                         class: "mt-8 text-4xl md:text-6xl font-black uppercase tracking-tight text-white",
@@ -215,9 +214,9 @@ pub fn Plugins() -> Element {
                     class: "mb-8 flex flex-col gap-4 reveal active",
                     div {
                         class: "relative",
-                        Icon {
-                            class: "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400",
-                            icon: "magnifying-glass",
+                        i {
+                            class: "fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500",
+                            "aria-hidden": "true"
                         }
                         input {
                             class: "w-full rounded-xl glass-panel py-3.5 pl-11 pr-4 text-sm text-white placeholder-gray-500 outline-none transition-colors focus:border-purple-500/50",
@@ -231,7 +230,7 @@ pub fn Plugins() -> Element {
                     div {
                         class: "flex flex-wrap items-center gap-2",
                         span {
-                            class: "mr-1 font-mono text-[11px] uppercase tracking-[0.22em] text-gray-400",
+                            class: "mr-1 font-mono text-[11px] uppercase tracking-[0.22em] text-gray-500",
                             "permission:"
                         }
                         for perm in CATALOG_PERMISSIONS {
@@ -254,7 +253,7 @@ pub fn Plugins() -> Element {
                         }
                         if filters_active {
                             button {
-                                class: "ml-1 font-mono text-xs text-gray-400 underline-offset-4 transition-colors hover:text-white hover:underline",
+                                class: "ml-1 font-mono text-xs text-gray-500 underline-offset-4 transition-colors hover:text-white hover:underline",
                                 onclick: move |_| {
                                     query.set(String::new());
                                     permission.set(None);
@@ -267,15 +266,15 @@ pub fn Plugins() -> Element {
 
                 // ── Result grid ───────────────────────────────────────
                 p {
-                    class: "mb-4 font-mono text-[11px] uppercase tracking-[0.22em] text-gray-400 reveal active",
+                    class: "mb-4 font-mono text-[11px] uppercase tracking-[0.22em] text-gray-500 reveal active",
                     "showing {filtered().len()} of {PLUGIN_CATALOG.len()} plugins"
                 }
                 if filtered().is_empty() {
                     div {
                         class: "border border-dashed border-white/15 px-6 py-16 text-center reveal active",
-                        Icon {
-                            class: "mb-4 text-2xl text-gray-400",
-                            icon: "magnifying-glass",
+                        i {
+                            class: "fa-solid fa-magnifying-glass mb-4 text-2xl text-gray-600",
+                            "aria-hidden": "true"
                         }
                         if query().is_empty() {
                             p { class: "mb-1 font-semibold text-white", "No plugins with this permission" }
@@ -330,7 +329,7 @@ pub fn Plugins() -> Element {
                         to: Route::DocsArticle { slug: "creating-plugins".to_string() },
                         class: "flex items-center gap-2 rounded-xl border border-purple-500/40 bg-purple-600/15 px-5 py-2.5 text-sm font-medium text-purple-200 transition-colors hover:bg-purple-600/30",
                         "Creating plugins"
-                        Icon { icon: "arrow-right", class: "text-xs" }
+                        i { class: "fa-solid fa-arrow-right text-xs", "aria-hidden": "true" }
                     }
                 }
             }
@@ -347,11 +346,11 @@ pub fn Plugins() -> Element {
 /// cell is a link to the plugin's repository, opened in a new tab.
 #[component]
 fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
-    let icon_class = match plugin.color {
-        "blue" => "text-lg text-blue-400",
-        "indigo" => "text-lg text-indigo-400",
-        "pink" => "text-lg text-pink-400",
-        _ => "text-lg text-purple-400",
+    let icon_color = match plugin.color {
+        "blue" => "text-blue-400",
+        "indigo" => "text-indigo-400",
+        "pink" => "text-pink-400",
+        _ => "text-purple-400",
     };
     let kind = match (plugin.frontend, plugin.backend) {
         (true, true) => "frontend + rust backend",
@@ -368,19 +367,19 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
             "aria-label": "View the {plugin.name} plugin repository on GitHub",
             class: "group relative block bg-[#08040f]/85 p-6 transition-colors hover:bg-[#140a26]",
             span {
-                class: "absolute top-3 right-4 font-mono text-[10px] tracking-[0.2em] text-gray-400 transition-colors group-hover:text-purple-400/70",
+                class: "absolute top-3 right-4 font-mono text-[10px] tracking-[0.2em] text-gray-600 transition-colors group-hover:text-purple-400/70",
                 "p.{index}"
             }
             div {
                 class: "mb-5 flex items-center gap-4",
                 div {
                     class: "flex h-10 w-10 shrink-0 items-center justify-center border border-white/10 bg-white/[0.03] transition-colors group-hover:border-purple-500/40",
-                    Icon { icon: plugin.icon, class: icon_class }
+                    i { class: "fa-solid {plugin.icon} text-lg {icon_color}", "aria-hidden": "true" }
                 }
                 div {
                     h3 { class: "text-base font-semibold text-white", "{plugin.name}" }
                     span {
-                        class: "font-mono text-[10px] tracking-[0.2em] text-gray-400",
+                        class: "font-mono text-[10px] tracking-[0.2em] text-gray-500",
                         "v{plugin.version}"
                     }
                 }
@@ -398,10 +397,10 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
             }
             div {
                 class: "flex items-center justify-between gap-2",
-                span { class: "font-mono text-[10px] uppercase tracking-[0.2em] text-gray-400", "{kind}" }
+                span { class: "font-mono text-[10px] uppercase tracking-[0.2em] text-gray-600", "{kind}" }
                 span {
-                    class: "flex items-center gap-1.5 font-mono text-[10px] tracking-[0.2em] text-gray-400 transition-colors group-hover:text-purple-300",
-                    Icon { icon: "github", class: "text-xs" }
+                    class: "flex items-center gap-1.5 font-mono text-[10px] tracking-[0.2em] text-gray-600 transition-colors group-hover:text-purple-300",
+                    i { class: "fa-brands fa-github text-xs", "aria-hidden": "true" }
                     "source"
                 }
             }

@@ -6,22 +6,6 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-# Smaller, faster-booting wasm: every byte shaved here is compile +
-# instantiate time off the main thread on first load.
-#
-# NOTE: `strip = true` is deliberately avoided — cargo implements it with
-# `llvm-objcopy --strip-all`, and since LLVM 23 that also removes the wasm's
-# custom sections, including the `__wasm_bindgen_unstable` metadata
-# wasm-bindgen needs. The bindgen step then fails on CI ("custom section is
-# missing"). `strip = "debuginfo"` maps to `--strip-debug`, which keeps
-# custom sections, so DWARF still comes off without breaking wasm-bindgen.
-[profile.release]
-opt-level = "z"
-lto = "fat"
-codegen-units = 1
-panic = "abort"
-strip = "debuginfo"
-
 [dependencies]
 # `fullstack` is enabled by the `server` feature (not unconditionally): a
 # fullstack client expects server-rendered hydration data and crashes with

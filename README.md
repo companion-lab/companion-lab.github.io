@@ -71,32 +71,12 @@ support, extend the renderer in
 
 ### GitHub Pages (static landing page)
 
-Pushes to `main` build the site with server-side prerendering and deploy it
-to GitHub Pages via [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml):
-
-1. `dx build --fullstack --ssg --release` compiles the wasm client and a
-   native server binary, then runs the binary briefly to prerender every
-   route from the `/api/static_routes` endpoint
-   (`src/server/mod.rs`) into static HTML with hydration data.
-2. `scripts/ssg-finalize.sh` re-renders `/` and `/404.html` (the client
-   build's asset copy races the prerender for `index.html`), collapses the
-   prerendered 404 page into the `404.html` SPA fallback GitHub Pages
-   serves for unknown paths, and sanity-checks the output.
-
-The prerendered pages paint instantly (the hero text is the LCP, straight
-from HTML) and the wasm hydrates them — this is what keeps the Lighthouse
-performance score at 100 on throttled mobile. One-time setup: enable
-**Settings → Pages → Source: GitHub Actions**. The site lives at
+Pushes to `main` automatically build the client-only WASM bundle and deploy it
+to GitHub Pages via [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
+One-time setup: enable **Settings → Pages → Source: GitHub Actions** (the
+workflow also attempts to enable it itself). The site lives at
 `https://<owner>.github.io/companion-landing-page/`; the asset base path is
 derived from the repo name in CI, so local `dx serve` stays unprefixed.
-
-Local SSG verification:
-
-```bash
-dx build --fullstack --ssg --release
-./scripts/ssg-finalize.sh
-python3 -m http.server 8788 --directory target/dx/companion-landing-page/release/web/public
-```
 
 ### Build-upload API (fullstack server)
 

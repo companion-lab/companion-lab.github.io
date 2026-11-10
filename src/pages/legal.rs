@@ -42,7 +42,7 @@ pub fn Legal() -> Element {
                         class: "flex items-center justify-between gap-4 border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-purple-300/90",
                         span { "cmp://legal-dossier" }
                         span {
-                            class: "flex items-center gap-2 text-gray-400",
+                            class: "flex items-center gap-2 text-gray-500",
                             span { class: "hud-dot", "aria-hidden": "true" }
                             "rev 2026.11.08 · live document"
                         }
@@ -245,7 +245,7 @@ pub fn Legal() -> Element {
 
                         // ── Dossier end strip ─────────────────────────────
                         div {
-                            class: "flex flex-wrap items-center justify-between gap-2 px-1 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-400",
+                            class: "flex flex-wrap items-center justify-between gap-2 px-1 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-500",
                             span { "end of dossier" }
                             span { "doc // cmp-legal-001 — classification: public" }
                         }
@@ -264,7 +264,7 @@ pub fn Legal() -> Element {
 fn MetaRow(label: &'static str, value: &'static str) -> Element {
     rsx! {
         div { class: "flex items-baseline justify-between gap-4",
-            span { class: "uppercase tracking-[0.18em] text-gray-400", "{label}" }
+            span { class: "uppercase tracking-[0.18em] text-gray-500", "{label}" }
             span { class: "text-gray-300", "{value}" }
         }
     }
@@ -282,7 +282,7 @@ fn SectionHeader(id: &'static str, title: &'static str, meta: &'static str) -> E
                 }
                 h2 { class: "text-2xl font-bold uppercase tracking-tight text-white sm:text-3xl", "{title}" }
                 span {
-                    class: "ml-auto font-mono text-[11px] uppercase tracking-[0.15em] text-gray-400",
+                    class: "ml-auto font-mono text-[11px] uppercase tracking-[0.15em] text-gray-500",
                     "{meta}"
                 }
             }
