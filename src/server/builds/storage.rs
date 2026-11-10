@@ -82,11 +82,9 @@ impl AppState {
             match s3.create_bucket().bucket(&bucket).send().await {
                 Ok(_) => {}
                 Err(e) => {
-                    let already_exists = e
-                        .as_service_error()
-                        .is_some_and(|se| {
-                            se.is_bucket_already_exists() || se.is_bucket_already_owned_by_you()
-                        });
+                    let already_exists = e.as_service_error().is_some_and(|se| {
+                        se.is_bucket_already_exists() || se.is_bucket_already_owned_by_you()
+                    });
                     if !already_exists {
                         return Err(anyhow::Error::new(e).context(format!(
                             "S3 bucket '{bucket}' does not exist and could not be created"
@@ -173,11 +171,12 @@ pub(super) async fn upload_build(
     let mut meta = UploadMeta::default();
     let mut file: Option<StoredUpload> = None;
 
-    while let Some(field) = multipart
-        .next_field()
-        .await
-        .map_err(|e| api_err(StatusCode::BAD_REQUEST, format!("invalid multipart body: {e}")))?
-    {
+    while let Some(field) = multipart.next_field().await.map_err(|e| {
+        api_err(
+            StatusCode::BAD_REQUEST,
+            format!("invalid multipart body: {e}"),
+        )
+    })? {
         match field.name() {
             Some("file") => file = Some(store_upload(field, &state).await?),
             Some("platform") => meta.platform = Some(read_text(field, 32, "platform").await?),
@@ -219,7 +218,12 @@ pub(super) async fn upload_build(
 
     let body = ByteStream::from_path(upload.temp.path())
         .await
-        .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to stage upload: {e}")))?;
+        .map_err(|e| {
+            api_err(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("failed to stage upload: {e}"),
+            )
+        })?;
     state
         .s3
         .put_object()
@@ -260,8 +264,12 @@ pub(super) async fn upload_build(
         // orphan is preferable to failing the whole upload silently.
         tracing::warn!(%e, s3_key, "build uploaded to S3 but not recorded in Postgres");
     }
-    let row = row
-        .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to record build: {e}")))?;
+    let row = row.map_err(|e| {
+        api_err(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("failed to record build: {e}"),
+        )
+    })?;
 
     Ok(row.into())
 }
@@ -274,7 +282,9 @@ pub(super) async fn latest_build(
 
     let platform = platform.to_lowercase();
     validate_slug(&platform, "platform")?;
-    let channel = channel.unwrap_or_else(|| "stable".to_string()).to_lowercase();
+    let channel = channel
+        .unwrap_or_else(|| "stable".to_string())
+        .to_lowercase();
     validate_slug(&channel, "channel")?;
 
     let row = sqlx::query_as::<_, BuildRow>(&format!(
@@ -287,7 +297,12 @@ pub(super) async fn latest_build(
     .bind(&channel)
     .fetch_optional(&state.pool)
     .await
-    .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to query builds: {e}")))?
+    .map_err(|e| {
+        api_err(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("failed to query builds: {e}"),
+        )
+    })?
     .ok_or_else(|| {
         api_err(
             StatusCode::NOT_FOUND,
@@ -296,7 +311,12 @@ pub(super) async fn latest_build(
     })?;
 
     let presigning = PresigningConfig::expires_in(Duration::from_secs(state.presign_expires_secs))
-        .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("invalid presign expiry: {e}")))?;
+        .map_err(|e| {
+            api_err(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("invalid presign expiry: {e}"),
+            )
+        })?;
     let url = state
         .s3
         .get_object()
@@ -304,7 +324,12 @@ pub(super) async fn latest_build(
         .key(&row.s3_key)
         .presigned(presigning)
         .await
-        .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to presign download URL: {e}")))?;
+        .map_err(|e| {
+            api_err(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("failed to presign download URL: {e}"),
+            )
+        })?;
 
     Ok(LatestBuildResponse {
         build: row.into(),
@@ -337,26 +362,38 @@ struct StoredUpload {
 async fn store_upload(field: Field<'_>, state: &AppState) -> ApiResult<StoredUpload> {
     let filename = field
         .file_name()
-        .ok_or_else(|| api_err(StatusCode::BAD_REQUEST, "'file' field must include a filename"))?
+        .ok_or_else(|| {
+            api_err(
+                StatusCode::BAD_REQUEST,
+                "'file' field must include a filename",
+            )
+        })?
         .to_string();
     let filename = sanitize_filename(&filename)?;
     let content_type = field.content_type().map(str::to_owned);
 
-    let temp = tempfile::NamedTempFile::new()
-        .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to stage upload: {e}")))?;
-    let mut out = tokio::fs::File::from_std(
-        temp.reopen()
-            .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to stage upload: {e}")))?,
-    );
+    let temp = tempfile::NamedTempFile::new().map_err(|e| {
+        api_err(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("failed to stage upload: {e}"),
+        )
+    })?;
+    let mut out = tokio::fs::File::from_std(temp.reopen().map_err(|e| {
+        api_err(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("failed to stage upload: {e}"),
+        )
+    })?);
 
     let mut hasher = Sha256::new();
     let mut size: u64 = 0;
     let mut field = field;
-    while let Some(chunk) = field
-        .chunk()
-        .await
-        .map_err(|e| api_err(StatusCode::BAD_REQUEST, format!("failed to read upload: {e}")))?
-    {
+    while let Some(chunk) = field.chunk().await.map_err(|e| {
+        api_err(
+            StatusCode::BAD_REQUEST,
+            format!("failed to read upload: {e}"),
+        )
+    })? {
         size += chunk.len() as u64;
         if size > state.max_upload_bytes as u64 {
             return Err(api_err(
@@ -368,13 +405,19 @@ async fn store_upload(field: Field<'_>, state: &AppState) -> ApiResult<StoredUpl
             ));
         }
         hasher.update(&chunk);
-        out.write_all(&chunk)
-            .await
-            .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to stage upload: {e}")))?;
+        out.write_all(&chunk).await.map_err(|e| {
+            api_err(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("failed to stage upload: {e}"),
+            )
+        })?;
     }
-    out.flush()
-        .await
-        .map_err(|e| api_err(StatusCode::INTERNAL_SERVER_ERROR, format!("failed to stage upload: {e}")))?;
+    out.flush().await.map_err(|e| {
+        api_err(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("failed to stage upload: {e}"),
+        )
+    })?;
 
     Ok(StoredUpload {
         temp,
@@ -386,10 +429,12 @@ async fn store_upload(field: Field<'_>, state: &AppState) -> ApiResult<StoredUpl
 }
 
 async fn read_text(field: Field<'_>, max_len: usize, name: &str) -> ApiResult<String> {
-    let value = field
-        .text()
-        .await
-        .map_err(|e| api_err(StatusCode::BAD_REQUEST, format!("invalid form field '{name}': {e}")))?;
+    let value = field.text().await.map_err(|e| {
+        api_err(
+            StatusCode::BAD_REQUEST,
+            format!("invalid form field '{name}': {e}"),
+        )
+    })?;
     if value.len() > max_len {
         return Err(api_err(
             StatusCode::BAD_REQUEST,

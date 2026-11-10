@@ -1,9 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{
-    components::atoms::SECTION_SCROLL_TARGET,
-    route::Route,
-};
+use crate::{components::atoms::SECTION_SCROLL_TARGET, route::Route};
 
 /// A single link in a [FooterColumn].
 #[derive(Clone, PartialEq)]

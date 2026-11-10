@@ -19,8 +19,7 @@ pub enum NavLinkVariant {
 /// page watches this signal and scrolls to the section once it has rendered,
 /// because a plain `#hash` link only works when the section is on the current
 /// page.
-pub static SECTION_SCROLL_TARGET: GlobalSignal<Option<&'static str>> =
-    GlobalSignal::new(|| None);
+pub static SECTION_SCROLL_TARGET: GlobalSignal<Option<&'static str>> = GlobalSignal::new(|| None);
 
 /// Scroll the element with `id` into view (no-op on the server).
 ///
@@ -65,13 +64,10 @@ pub fn scroll_to_entry_hash() {
         };
         // Mark user-initiated scrolling (wheel, touch, keyboard) so the retry
         // loop below stops instead of fighting the user for the viewport.
-        let listener =
-            Closure::<dyn FnMut()>::new(|| USER_SCROLLED.with(|flag| flag.set(true)));
+        let listener = Closure::<dyn FnMut()>::new(|| USER_SCROLLED.with(|flag| flag.set(true)));
         for event in ["wheel", "touchstart", "keydown"] {
-            let _ = window.add_event_listener_with_callback(
-                event,
-                listener.as_ref().unchecked_ref(),
-            );
+            let _ =
+                window.add_event_listener_with_callback(event, listener.as_ref().unchecked_ref());
         }
         // Lives for the page (one tiny closure, leaked on purpose).
         listener.forget();

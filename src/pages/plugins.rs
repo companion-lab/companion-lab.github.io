@@ -179,7 +179,11 @@ pub fn Plugins() -> Element {
             (false, true) => "hidden sm:hidden lg:block",
             (false, false) => "hidden",
         };
-        let second = if need_lg >= 2 { "hidden sm:hidden lg:block" } else { "hidden" };
+        let second = if need_lg >= 2 {
+            "hidden sm:hidden lg:block"
+        } else {
+            "hidden"
+        };
         vec![first, second]
     };
 

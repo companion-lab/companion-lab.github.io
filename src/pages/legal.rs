@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::{
-        AmbientBackground, Footer, SECTION_SCROLL_TARGET, scroll_to_entry_hash, scroll_to_id,
+        scroll_to_entry_hash, scroll_to_id, AmbientBackground, Footer, SECTION_SCROLL_TARGET,
     },
     config::{COMMUNITY_GITHUB_URL, DISCORD_URL},
 };

@@ -1,10 +1,10 @@
 use dioxus::prelude::*;
 
+use crate::components::scroll_to_entry_hash;
 use crate::{
     components::{AmbientBackground, Footer, MarkdownView},
     route::Route,
 };
-use crate::components::scroll_to_entry_hash;
 
 /// One documentation article.
 pub struct DocArticle {

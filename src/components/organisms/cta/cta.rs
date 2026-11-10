@@ -1,9 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{
-    components::molecules::DownloadButtons,
-    route::Route,
-};
+use crate::{components::molecules::DownloadButtons, route::Route};
 
 #[component]
 pub fn Cta() -> Element {

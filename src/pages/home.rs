@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::components::{
-    AmbientBackground, Cta, Features, Footer, Hero, Specs, SECTION_SCROLL_TARGET,
-    scroll_to_entry_hash, scroll_to_id,
+    scroll_to_entry_hash, scroll_to_id, AmbientBackground, Cta, Features, Footer, Hero, Specs,
+    SECTION_SCROLL_TARGET,
 };
 
 /// Home page

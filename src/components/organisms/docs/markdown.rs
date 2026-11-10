@@ -349,9 +349,7 @@ fn parse_inline(events: &[Event<'_>], cursor: &mut usize) -> Vec<Element> {
             // A nested block inside inline content (e.g. a list inside a
             // tight list item): hand it back to the block renderer so it
             // isn't mangled.
-            Event::Start(
-                Tag::List(_) | Tag::BlockQuote(_) | Tag::CodeBlock(_) | Tag::Table(_),
-            ) => {
+            Event::Start(Tag::List(_) | Tag::BlockQuote(_) | Tag::CodeBlock(_) | Tag::Table(_)) => {
                 out.extend(parse_blocks(events, cursor));
             }
             // Raw inline HTML is dropped, not rendered.
