@@ -10,11 +10,11 @@ pub enum ButtonVariant {
 }
 
 /// The large rounded call-to-action control. Renders an `<a>` when `href` is
-/// set, otherwise a `<button>`.
+/// set (build-time or runtime-resolved URLs), otherwise a `<button>`.
 #[component]
 pub fn ActionButton(
     variant: ButtonVariant,
-    href: Option<&'static str>,
+    href: Option<String>,
     onmousedown: Option<EventHandler<MouseEvent>>,
     class: Option<&'static str>,
     children: Element,

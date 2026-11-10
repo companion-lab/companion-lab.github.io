@@ -1160,6 +1160,7 @@ dependencies = [
  "aws-config",
  "aws-sdk-s3",
  "dioxus",
+ "gloo-net",
  "hex",
  "js-sys",
  "pulldown-cmark",

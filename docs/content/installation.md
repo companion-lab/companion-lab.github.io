@@ -13,10 +13,11 @@ background — just your character floating on top of your workspace.
 
 ## 1. Download
 
-Grab the latest build from the
-[GitHub releases page](https://github.com/companion/companion/releases/latest).
-The download buttons on the landing page point at the same place and detect
-your platform automatically.
+The download buttons on the landing page fetch the newest release for your
+platform automatically (each zip carries the platform's installers inside —
+a `.dmg` on macOS, `.msi`/`.exe` on Windows, `.deb` on Linux). Or grab it
+manually from the
+[GitHub releases page](https://github.com/companion-lab/companion-desktop/releases/latest).
 
 ## 2. Run the app
 
@@ -65,7 +66,7 @@ keychain**, not in a plain file.
 ## Updating
 
 Download the new build from the
-[releases page](https://github.com/companion/companion/releases/latest) and
+[releases page](https://github.com/companion-lab/companion-desktop/releases/latest) and
 replace the old app. Your settings, plugins, and avatar data live in the app
 data folder and survive updates.
 

@@ -6,12 +6,20 @@ use std::path::Path;
 /// resolved with dotenv precedence: an exported shell variable wins, then the
 /// `.env` value, then the hardcoded default. The defaults also cover CI
 /// builds (GitHub Pages) that run without a `.env`.
-const SITE_LINKS: [(&str, &str); 3] = [
+const SITE_LINKS: [(&str, &str); 4] = [
     ("COMMUNITY_GITHUB_URL", "https://github.com/companion-vr"),
     ("DISCORD_URL", "https://discord.gg/G46H7B9x"),
+    // Releases *page* of the app repo — the download buttons' fallback link.
     (
         "RELEASES_URL",
-        "https://github.com/companion/companion/releases/latest",
+        "https://github.com/companion-lab/companion-desktop/releases/latest",
+    ),
+    // Releases *API* of the app repo — resolves the per-platform installer
+    // zip asset URLs at runtime (release assets embed the version number, so
+    // they cannot be named statically). See src/latest_release.rs.
+    (
+        "RELEASES_API_URL",
+        "https://api.github.com/repos/companion-lab/companion-desktop/releases/latest",
     ),
 ];
 

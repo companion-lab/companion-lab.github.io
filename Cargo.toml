@@ -57,6 +57,9 @@ server = [
 ]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+# Fetch the latest release's installer zip URLs from the GitHub Releases API
+# at runtime (see src/latest_release.rs); json()/send() wrap serde globally.
+gloo-net = "0.6"
 web-sys = { version = "0.3", features = [
     "Window",
     "Navigator",

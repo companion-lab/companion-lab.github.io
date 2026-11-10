@@ -3,9 +3,14 @@ use dioxus::prelude::*;
 use crate::{
     components::atoms::{ActionButton, ButtonVariant},
     config::RELEASES_URL,
+    latest_release::LatestAssets,
 };
 
 /// Platform download buttons, with the detected platform first and highlighted.
+///
+/// Each button links directly to the matching installer zip from the latest
+/// GitHub release (resolved at runtime, shared via [LatestAssets]) with the
+/// releases page as the fallback link.
 ///
 /// On mobile the buttons stack full-width; on desktop they sit in a row —
 /// centered when `centered` is set (the CTA section), flush-left otherwise
@@ -44,6 +49,8 @@ pub fn DownloadButtons(centered: bool) -> Element {
         }
     };
 
+    let latest: Signal<LatestAssets> = use_context();
+
     let platforms: [(i32, &str, &str); 3] = [
         (0, "fa-brands fa-windows", "Windows"),
         (1, "fa-brands fa-apple", "macOS"),
@@ -51,6 +58,19 @@ pub fn DownloadButtons(centered: bool) -> Element {
     ];
     let mut ordered = platforms.to_vec();
     ordered.sort_by(|a, b| (a.0 != detected).cmp(&(b.0 != detected)));
+
+    // Resolve each platform's link (latest release asset, or the releases
+    // page as the fallback) outside rsx — `let` is not an rsx statement, and
+    // signaling the shared [LatestAssets] keeps hrefs in sync with it.
+    let items = ordered
+        .into_iter()
+        .map(|(code, icon, label)| {
+            let href = latest.read().urls[code as usize]
+                .clone()
+                .unwrap_or_else(|| RELEASES_URL.to_string());
+            (code, icon, label, href)
+        })
+        .collect::<Vec<_>>();
 
     let layout = if centered {
         "sm:items-center sm:justify-center"
@@ -61,10 +81,10 @@ pub fn DownloadButtons(centered: bool) -> Element {
     rsx! {
         div {
             class: "w-full flex flex-col sm:flex-row items-stretch {layout} gap-3 flex-wrap",
-            for (code, icon, label) in ordered {
+            for (code, icon, label, href) in items {
                 ActionButton {
                     variant: if code == detected { ButtonVariant::Primary } else { ButtonVariant::Glass },
-                    href: RELEASES_URL,
+                    href: href,
                     class: "w-full sm:w-auto",
                     i { class: "{icon} text-xl group-hover:-translate-y-1 transition-transform" }
                     span { "{label}" }

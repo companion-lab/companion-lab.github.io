@@ -1,5 +1,6 @@
 mod components;
 mod config;
+mod latest_release;
 mod pages;
 mod route;
 
@@ -43,11 +44,9 @@ fn main() {
             // functions; DefaultBodyLimit raises the default 2 MB request
             // limit so multipart uploads can pass.
             let max_upload_bytes = state.max_upload_bytes;
-            router = router
-                .layer(dioxus::server::axum::Extension(state))
-                .layer(dioxus::server::axum::extract::DefaultBodyLimit::max(
-                    max_upload_bytes,
-                ));
+            router = router.layer(dioxus::server::axum::Extension(state)).layer(
+                dioxus::server::axum::extract::DefaultBodyLimit::max(max_upload_bytes),
+            );
         }
 
         Ok(router)
@@ -56,6 +55,10 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    // Shared latest-release download links: provided before the router
+    // mounts, resolved at runtime on the web (see latest_release.rs).
+    crate::latest_release::provide();
+
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
