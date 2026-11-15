@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use crate::{
     components::{AmbientBackground, Footer},
     config::COMMUNITY_GITHUB_URL,
+    plugin_releases::{detect_platform, fetch_releases, PluginPlatform, PluginRelease, PluginZip},
     route::Route,
 };
 
@@ -35,7 +36,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "chat",
         repo: "companion-plugin-chat",
         name: "Chat",
-        version: "0.1.0",
+        version: "0.3.0",
         description: "The avatar's AI conversation: provider chat with tool loop, streaming TTS/STT speech, wake word, clarifying questions, and the Persona/Connection settings sections.",
         icon: "fa-comments",
         color: "purple",
@@ -47,7 +48,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "vrm",
         repo: "companion-plugin-vrm",
         name: "VRM Avatar",
-        version: "0.1.0",
+        version: "0.3.0",
         description: "VRM avatar models (with the built-in demo asset), motion and emotion clips, and graphics settings.",
         icon: "fa-cube",
         color: "blue",
@@ -59,7 +60,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "companion-plugin-l2d",
         repo: "companion-plugin-l2d",
         name: "Live2D Avatar",
-        version: "0.1.0",
+        version: "0.3.0",
         description: "Live2D avatar for the desktop overlay: renders the bundled Cubism model and answers the avatar bus (chat emotions, TTS lip sync, click-through).",
         icon: "fa-masks-theater",
         color: "indigo",
@@ -71,7 +72,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "stt",
         repo: "companion-plugin-stt",
         name: "Speech Recognition",
-        version: "0.1.1",
+        version: "0.3.0",
         description: "On-device STT (Moonshine) + cloud transcription, with a Speech Recognition settings tab and the cloud STT endpoint card.",
         icon: "fa-microphone-lines",
         color: "pink",
@@ -83,7 +84,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "tts",
         repo: "companion-plugin-tts",
         name: "Speech Synthesis",
-        version: "0.1.0",
+        version: "0.3.0",
         description: "On-device TTS (Supertonic) + cloud synthesis, with a Speech Synthesis settings tab and the cloud TTS endpoint card.",
         icon: "fa-volume-high",
         color: "purple",
@@ -95,7 +96,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "alarms",
         repo: "companion-plugin-alarms",
         name: "Alarms",
-        version: "0.1.0",
+        version: "0.3.0",
         description: "Timed alarms and reminders: a settings tab, the ringing banner, and alarm tools the avatar can call.",
         icon: "fa-bell",
         color: "blue",
@@ -107,7 +108,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "calendar",
         repo: "companion-plugin-calendar",
         name: "Calendar",
-        version: "0.1.0",
+        version: "0.3.0",
         description: "Dated events, birthdays, and appointments: a settings tab, reminder banners, and calendar tools the avatar can call.",
         icon: "fa-calendar-days",
         color: "indigo",
@@ -119,7 +120,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "mcp",
         repo: "companion-plugin-mcp",
         name: "MCP Tools",
-        version: "0.1.0",
+        version: "0.3.0",
         description: "Model Context Protocol client: connect MCP servers and expose their tools to the avatar.",
         icon: "fa-plug",
         color: "pink",
@@ -344,12 +345,30 @@ pub fn Plugins() -> Element {
     }
 }
 
+/// Fetch state of a card's download panel. Kept per card — not reset when
+/// the panel closes — so toggling the panel never re-requests; a failed
+/// lookup (rate limit, offline) stays until reload and keeps its fallback
+/// link to the GitHub releases page.
+#[derive(Clone, PartialEq)]
+enum ReleasesState {
+    Loading,
+    Loaded(Vec<PluginRelease>),
+    Failed(String),
+}
+
 /// One cell of the plugin data-grid: square hairline icon badge, version tag,
 /// declared permissions as mono chips, and the shipped entry points. Indexes
-/// like a register (`p.01`), matching the feature cells' `f.01`. The whole
-/// cell is a link to the plugin's repository, opened in a new tab.
+/// like a register (`p.01`), matching the feature cells' `f.01`. The header
+/// links to the plugin's repository (opened in a new tab); the download
+/// button opens a panel listing every published release's installable zips
+/// (see [DownloadPanel]).
 #[component]
 fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
+    let mut panel_open = use_signal(|| false);
+    // `None` until the first open kicks off the (one-time) release lookup.
+    let mut releases = use_signal(|| Option::<ReleasesState>::None);
+    let detected = detect_platform();
+
     let icon_color = match plugin.color {
         "blue" => "text-blue-400",
         "indigo" => "text-indigo-400",
@@ -363,18 +382,40 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
         (false, false) => "metadata only",
     };
 
+    let toggle = move |_| {
+        let opening = !panel_open();
+        panel_open.set(opening);
+        if opening && releases().is_none() {
+            releases.set(Some(ReleasesState::Loading));
+            let mut releases = releases;
+            spawn(async move {
+                let state = match fetch_releases(plugin).await {
+                    Ok(list) => ReleasesState::Loaded(list),
+                    Err(error) => ReleasesState::Failed(error),
+                };
+                // Only land the result in a still-loading panel: a later
+                // open/close cycle may already have superseded this request
+                // (the panel keeps its state across toggles, so there is
+                // nothing to refresh).
+                if releases() == Some(ReleasesState::Loading) {
+                    releases.set(Some(state));
+                }
+            });
+        }
+    };
+
     rsx! {
-        a {
-            href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}",
-            target: "_blank",
-            rel: "noopener noreferrer",
-            "aria-label": "View the {plugin.name} plugin repository on GitHub",
-            class: "group relative block bg-[#08040f]/85 p-6 transition-colors hover:bg-[#140a26]",
+        div {
+            class: "group relative bg-[#08040f]/85 p-6 transition-colors hover:bg-[#140a26]",
             span {
                 class: "absolute top-3 right-4 font-mono text-[10px] tracking-[0.2em] text-gray-600 transition-colors group-hover:text-purple-400/70",
                 "p.{index}"
             }
-            div {
+            a {
+                href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                "aria-label": "View the {plugin.name} plugin repository on GitHub",
                 class: "mb-5 flex items-center gap-4",
                 div {
                     class: "flex h-10 w-10 shrink-0 items-center justify-center border border-white/10 bg-white/[0.03] transition-colors group-hover:border-purple-500/40",
@@ -400,14 +441,181 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
                 }
             }
             div {
-                class: "flex items-center justify-between gap-2",
+                class: "flex items-center justify-between gap-3",
                 span { class: "font-mono text-[10px] uppercase tracking-[0.2em] text-gray-600", "{kind}" }
-                span {
-                    class: "flex items-center gap-1.5 font-mono text-[10px] tracking-[0.2em] text-gray-600 transition-colors group-hover:text-purple-300",
-                    i { class: "fa-brands fa-github text-xs", "aria-hidden": "true" }
-                    "source"
+                div {
+                    class: "flex items-center gap-3",
+                    a {
+                        href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}",
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                        "aria-label": "View the {plugin.name} plugin repository on GitHub",
+                        class: "flex items-center gap-1.5 font-mono text-[10px] tracking-[0.2em] text-gray-600 transition-colors hover:text-purple-300",
+                        i { class: "fa-brands fa-github text-xs", "aria-hidden": "true" }
+                        "source"
+                    }
+                    button {
+                        "aria-expanded": "{panel_open()}",
+                        "aria-controls": "download-{plugin.id}",
+                        onclick: toggle,
+                        class: "flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/15 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-purple-200 transition-colors hover:bg-purple-600/30",
+                        i {
+                            class: if panel_open() { "fa-solid fa-chevron-up text-xs" } else { "fa-solid fa-download text-xs" },
+                            "aria-hidden": "true"
+                        }
+                        if panel_open() { "close" } else { "download" }
+                    }
+                }
+            }
+            if panel_open() {
+                DownloadPanel {
+                    key: "panel-{plugin.id}",
+                    plugin,
+                    state: releases().unwrap_or(ReleasesState::Loading),
+                    detected,
                 }
             }
         }
+    }
+}
+
+/// The version chooser below a card's footer: every published release of the
+/// plugin repo (newest first), each with its installable zips — one per
+/// platform for backend plugins, a single universal zip for frontend-only
+/// ones. The visitor's platform (when detected) sorts and highlights first.
+#[component]
+fn DownloadPanel(
+    plugin: &'static PluginEntry,
+    state: ReleasesState,
+    detected: Option<PluginPlatform>,
+) -> Element {
+    let latest_idx = match &state {
+        ReleasesState::Loaded(list) => list
+            .iter()
+            .position(|release| !release.prerelease)
+            .unwrap_or(0),
+        _ => 0,
+    };
+
+    rsx! {
+        div {
+            id: "download-{plugin.id}",
+            class: "mt-4 border-t border-white/10 pt-4",
+            {match &state {
+                ReleasesState::Loading => rsx! {
+                    p {
+                        class: "flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-gray-500",
+                        i { class: "fa-solid fa-circle-notch fa-spin", "aria-hidden": "true" }
+                        "loading releases…"
+                    }
+                },
+                ReleasesState::Loaded(list) => rsx! {
+                    if list.is_empty() {
+                        p { class: "mb-2 text-xs text-gray-400", "No published releases yet." }
+                        ReleasesFallbackLink { plugin }
+                    } else {
+                        for (idx, release) in list.iter().enumerate() {
+                            div {
+                                key: "{release.tag}",
+                                class: "mb-3 last:mb-0",
+                                div {
+                                    class: "flex flex-wrap items-center gap-x-3 gap-y-1",
+                                    span { class: "font-mono text-xs font-semibold text-white", "{release.tag}" }
+                                    if idx == latest_idx {
+                                        span {
+                                            class: "rounded-full border border-purple-500/40 bg-purple-600/20 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-purple-200",
+                                            "latest"
+                                        }
+                                    }
+                                    if release.prerelease {
+                                        span {
+                                            class: "rounded-full border border-white/15 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-gray-400",
+                                            "pre-release"
+                                        }
+                                    }
+                                }
+                                div {
+                                    class: "mt-1.5 flex flex-wrap gap-x-4 gap-y-1.5",
+                                    for zip in ordered_zips(release, detected) {
+                                        a {
+                                            key: "{zip.url}",
+                                            href: "{zip.url}",
+                                            class: "flex items-center gap-1.5 font-mono text-[11px] {zip_class(&zip, detected)}",
+                                            i { class: "{zip_icon(&zip)} text-[10px]", "aria-hidden": "true" }
+                                            "{zip_label(&zip)}"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // The lookup may be the CDN fallback (whose zip URLs
+                        // are derived and can dead-end on repos whose tags
+                        // were pushed without the release job) or simply be
+                        // missing older versions — keep the source of truth
+                        // one click away.
+                        div {
+                            class: "mt-3",
+                            ReleasesFallbackLink { plugin }
+                        }
+                    }
+                },
+                ReleasesState::Failed(error) => rsx! {
+                    p { class: "mb-2 text-xs text-red-300/90", "Couldn't load the release list ({error})." }
+                    ReleasesFallbackLink { plugin }
+                },
+            }}
+            p {
+                class: "mt-3 border-t border-white/5 pt-3 font-mono text-[10px] leading-relaxed tracking-wide text-gray-500",
+                "Import into Companion: Settings → Plugins → Import plugin… — pick the zip for your platform."
+            }
+        }
+    }
+}
+
+/// The repo's releases page on GitHub — the panel's escape hatch when a
+/// lookup cannot serve zips (rate-limited mirror, no releases yet), and the
+/// way to older versions and source archives in any state.
+#[component]
+fn ReleasesFallbackLink(plugin: &'static PluginEntry) -> Element {
+    rsx! {
+        a {
+            href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}/releases",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            class: "flex items-center gap-1.5 font-mono text-[11px] text-gray-400 transition-colors hover:text-purple-300",
+            i { class: "fa-brands fa-github text-xs", "aria-hidden": "true" }
+            "Browse releases on GitHub"
+        }
+    }
+}
+
+/// The release's zips, the detected platform's first (the rest keep their
+/// filename order).
+fn ordered_zips(release: &PluginRelease, detected: Option<PluginPlatform>) -> Vec<PluginZip> {
+    let mut zips = release.zips.clone();
+    zips.sort_by_key(|zip| if zip.platform == detected { 0 } else { 1 });
+    zips
+}
+
+/// Download-link styling: accent for the detected platform and for universal
+/// (frontend-only) zips, quiet gray otherwise.
+fn zip_class(zip: &PluginZip, detected: Option<PluginPlatform>) -> &'static str {
+    if zip.platform == detected || zip.platform.is_none() {
+        "text-purple-300 transition-colors hover:text-purple-200"
+    } else {
+        "text-gray-400 transition-colors hover:text-purple-300"
+    }
+}
+
+fn zip_icon(zip: &PluginZip) -> &'static str {
+    zip.platform
+        .map(|platform| platform.icon())
+        .unwrap_or("fa-solid fa-file-zipper")
+}
+
+fn zip_label(zip: &PluginZip) -> String {
+    match zip.platform {
+        Some(platform) => platform.label().to_string(),
+        None => "All platforms".to_string(),
     }
 }

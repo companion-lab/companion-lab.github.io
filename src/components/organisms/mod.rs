@@ -5,6 +5,7 @@ mod features;
 mod footer;
 mod hero;
 mod navbar;
+mod preview;
 mod specs;
 
 pub use ambient_background::*;
@@ -14,4 +15,5 @@ pub use features::*;
 pub use footer::*;
 pub use hero::*;
 pub use navbar::*;
+pub use preview::*;
 pub use specs::*;

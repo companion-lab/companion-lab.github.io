@@ -9,7 +9,7 @@
 //! This is compile-time (not `std::env::var`) because the navbar/footer
 //! render inside the wasm client, which has no runtime environment; baking
 //! the values keeps SSR and hydration consistent. `env!` cannot fail: the
-//! build script unconditionally emits all four.
+//! build script unconditionally emits all six.
 //!
 //! These are public site links. Server-side secrets (DATABASE_URL etc.) are
 //! a different story — see `src/server/builds/storage.rs`, which reads them
@@ -25,8 +25,21 @@ pub const DISCORD_URL: &str = env!("DISCORD_URL");
 /// link, shown until a runtime lookup resolves the asset URLs (or on errors).
 pub const RELEASES_URL: &str = env!("RELEASES_URL");
 
-/// GitHub releases API of the app repo, queried at runtime to resolve the
-/// latest release's per-platform installer zip asset URLs (see
+/// GitHub releases list API of the app repo, queried at runtime to resolve
+/// each published release's per-platform installer zip asset URLs (and the
+/// version list behind the download buttons' version selector — see
 /// src/latest_release.rs).
 #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
 pub const RELEASES_API_URL: &str = env!("RELEASES_API_URL");
+
+/// GitHub Releases API base listing the official plugin repos, queried at
+/// runtime as `{base}/{repo}/releases` to resolve each plugin's published
+/// versions and zip assets (see src/plugin_releases.rs).
+#[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+pub const PLUGIN_RELEASES_API_URL: &str = env!("PLUGIN_RELEASES_API_URL");
+
+/// jsDelivr data-API base mirroring the official plugin repos — the plugin
+/// release lookup's fallback when the GitHub API rate-limits the visitor's
+/// IP (see src/plugin_releases.rs).
+#[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+pub const PLUGIN_RELEASES_CDN_URL: &str = env!("PLUGIN_RELEASES_CDN_URL");

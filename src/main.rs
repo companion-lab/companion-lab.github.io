@@ -2,6 +2,7 @@ mod components;
 mod config;
 mod latest_release;
 mod pages;
+mod plugin_releases;
 mod route;
 
 // The upload API is native-only: its server functions and storage stack

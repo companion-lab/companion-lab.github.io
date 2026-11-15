@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::components::{
-    scroll_to_entry_hash, scroll_to_id, AmbientBackground, Cta, Features, Footer, Hero, Specs,
-    SECTION_SCROLL_TARGET,
+    scroll_to_entry_hash, scroll_to_id, AmbientBackground, Cta, Features, Footer, Hero, Preview,
+    Specs, SECTION_SCROLL_TARGET,
 };
 
 /// Home page
@@ -27,6 +27,7 @@ pub fn Home() -> Element {
     rsx! {
         AmbientBackground {}
         Hero {}
+        // Preview {}
         Features {}
         Specs {}
         Cta {}

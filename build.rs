@@ -6,20 +6,39 @@ use std::path::Path;
 /// resolved with dotenv precedence: an exported shell variable wins, then the
 /// `.env` value, then the hardcoded default. The defaults also cover CI
 /// builds (GitHub Pages) that run without a `.env`.
-const SITE_LINKS: [(&str, &str); 4] = [
-    ("COMMUNITY_GITHUB_URL", "https://github.com/companion-vr"),
+const SITE_LINKS: [(&str, &str); 6] = [
+    // The org all official repos live under (companion-vr, the previous
+    // default, no longer exists).
+    ("COMMUNITY_GITHUB_URL", "https://github.com/companion-lab"),
     ("DISCORD_URL", "https://discord.gg/G46H7B9x"),
     // Releases *page* of the app repo — the download buttons' fallback link.
     (
         "RELEASES_URL",
         "https://github.com/companion-lab/companion-desktop/releases/latest",
     ),
-    // Releases *API* of the app repo — resolves the per-platform installer
-    // zip asset URLs at runtime (release assets embed the version number, so
-    // they cannot be named statically). See src/latest_release.rs.
+    // Releases *API* of the app repo — the published-releases list, resolved
+    // at runtime into per-release per-platform installer zip asset URLs (and
+    // the version list behind the download buttons' version selector; assets
+    // embed the version number, so they cannot be named statically). See
+    // src/latest_release.rs.
     (
         "RELEASES_API_URL",
-        "https://api.github.com/repos/companion-lab/companion-desktop/releases/latest",
+        "https://api.github.com/repos/companion-lab/companion-desktop/releases?per_page=25",
+    ),
+    // Releases *API* base listing the official plugin repos — the plugins
+    // page appends `/{repo}/releases` per plugin card to resolve that
+    // plugin's published versions (see src/plugin_releases.rs).
+    (
+        "PLUGIN_RELEASES_API_URL",
+        "https://api.github.com/repos/companion-lab",
+    ),
+    // CDN mirror of the same data, used as the plugin release fallback: the
+    // GitHub API rate-limits unauthenticated visitors per IP, and jsDelivr's
+    // data API serves each repo's version tags CORS-open without meaningful
+    // limits (see src/plugin_releases.rs).
+    (
+        "PLUGIN_RELEASES_CDN_URL",
+        "https://data.jsdelivr.com/v1/packages/gh/companion-lab",
     ),
 ];
 

@@ -60,9 +60,11 @@ jobs:
           COMMUNITY_GITHUB_URL: ${{ vars.COMMUNITY_GITHUB_URL }}
           DISCORD_URL: ${{ vars.DISCORD_URL }}
           RELEASES_URL: ${{ vars.RELEASES_URL }}
+          PLUGIN_RELEASES_API_URL: ${{ vars.PLUGIN_RELEASES_API_URL }}
+          PLUGIN_RELEASES_CDN_URL: ${{ vars.PLUGIN_RELEASES_CDN_URL }}
         run: |
           : > .env
-          for key in COMMUNITY_GITHUB_URL DISCORD_URL RELEASES_URL; do
+          for key in COMMUNITY_GITHUB_URL DISCORD_URL RELEASES_URL PLUGIN_RELEASES_API_URL PLUGIN_RELEASES_CDN_URL; do
             value="${!key}"
             # `if` rather than `[ … ] && …` — under `bash -e`, an empty
             # variable would make the failed test the loop's exit status

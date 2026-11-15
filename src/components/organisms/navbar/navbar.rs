@@ -8,7 +8,8 @@ use crate::{
 
 const LOGO_IMAGE: Asset = asset!("/assets/icon.png");
 
-const NAV_ITEMS: [(&str, &str); 3] = [
+const NAV_ITEMS: [(&str, &str); 4] = [
+    ("#preview", "Preview"),
     ("#features", "Features"),
     ("#specs", "Tech Specs"),
     ("#download", "Download"),
