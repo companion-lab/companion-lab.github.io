@@ -191,15 +191,7 @@ comes from npm as `@companion-lab/plugin`):
 npm install
 ```
 
-Running from a companion-tauri checkout, the CLI also works straight from the
-repository without any install:
-
-```bash
-node plugin-cli/bin/companion-cli.mjs build my-plugin
-```
-
-esbuild is resolved from the CLI's own dependencies (or `app/node_modules` as
-a fallback), so the CLI works even without the install step. The frontend is
+esbuild is resolved from the CLI's own dependencies. The frontend is
 bundled with esbuild (React is aliased to the host's copies via the SDK
 shims — never bundled). The Rust backend is built with `cargo build
 --release` whenever `backend/` and `manifest.backend` both exist; use
