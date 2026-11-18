@@ -12,10 +12,15 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Daily refresh: plugin releases happen in other repos and can't trigger
+    # this workflow, so the catalog chips are re-synced on a clock instead.
+    - cron: "17 6 * * *"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  # contents: write lets the build job push the synced catalog back to main.
+  contents: write
   pages: write
   id-token: write
 
@@ -29,6 +34,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Refresh the hardcoded version chips from the plugins' published
+      # releases before building (see scripts/sync-plugin-versions.mjs).
+      # Best-effort: lookup failures keep the committed versions, so this
+      # never breaks the deploy. Committed back with [skip ci] so the push
+      # doesn't retrigger this workflow (the run below already deploys).
+      - name: Sync plugin catalog versions from GitHub releases
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/sync-plugin-versions.mjs
+
+      - name: Commit synced catalog
+        run: |
+          if git diff --quiet src/pages/plugins.rs; then
+            echo "catalog unchanged"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "[skip ci] chore: sync plugin catalog versions"
+            git push
+          fi
 
       - uses: dtolnay/rust-toolchain@stable
         with:
