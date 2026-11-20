@@ -566,7 +566,12 @@ fn DownloadPanel(
             }}
             p {
                 class: "mt-3 border-t border-white/5 pt-3 font-mono text-[10px] leading-relaxed tracking-wide text-gray-500",
-                "Import into Companion: Settings → Plugins → Import plugin… — pick the zip for your platform."
+                "Import into Companion: Settings → Plugins → Import plugin… — pick the zip for your platform. "
+                Link {
+                    to: Route::DocsArticle { slug: "importing-plugins".to_string() },
+                    class: "text-purple-400 transition-colors hover:text-purple-300",
+                    "More on importing plugins"
+                }
             }
         }
     }

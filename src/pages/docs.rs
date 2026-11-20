@@ -17,7 +17,7 @@ pub struct DocArticle {
 /// The docs shipped with the site. The markdown is embedded at build time
 /// (`include_str!`) because the Pages deployment is a static client-only
 /// bundle — there is no server to fetch content from.
-pub static DOC_ARTICLES: [DocArticle; 4] = [
+pub static DOC_ARTICLES: [DocArticle; 5] = [
     DocArticle {
         slug: "installation",
         title: "Installation",
@@ -29,6 +29,12 @@ pub static DOC_ARTICLES: [DocArticle; 4] = [
         title: "Usage",
         description: "Talk to your companion, ask for tools, and make the avatar act.",
         markdown: include_str!("../../docs/content/usage.md"),
+    },
+    DocArticle {
+        slug: "importing-plugins",
+        title: "Importing Plugins",
+        description: "Get plugin zips onto your machine — official releases or your own build — and manage them.",
+        markdown: include_str!("../../docs/content/importing-plugins.md"),
     },
     DocArticle {
         slug: "creating-plugins",

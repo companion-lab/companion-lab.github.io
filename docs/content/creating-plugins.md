@@ -206,7 +206,7 @@ shims — never bundled). The Rust backend is built with `cargo build
 | `--flat` | Put `manifest.json` at the zip root instead of inside an `<id>/` folder — the importer accepts both layouts |
 | `--no-backend` | Skip the Rust build even if `backend/` exists |
 | `--no-frontend` | Skip the JS bundle (backend-only plugin) |
-| `--sdk <dir>` | Path to the plugin JS SDK (defaults to the shims bundled with the CLI; inside a companion-tauri checkout, the repo's own `sdk/js/@companion/plugin`) |
+| `--sdk <dir>` | Path to the plugin JS SDK (defaults to the `@companion-lab/plugin` package installed with the CLI; inside a companion-tauri checkout, the repo's own `sdk/js/@companion/plugin`) |
 
 Zip entries use a fixed timestamp, so identical inputs produce
 byte-identical archives.
