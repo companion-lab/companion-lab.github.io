@@ -27,7 +27,7 @@ pub fn Home() -> Element {
     rsx! {
         AmbientBackground {}
         Hero {}
-        // Preview {}
+        Preview {}
         Features {}
         Specs {}
         Cta {}

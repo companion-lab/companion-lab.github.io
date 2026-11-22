@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 /// there at build time, so replacing the placeholder file needs no code
 /// changes. The placeholder currently in place is not a playable video; it
 /// only exists so the build compiles before the recording lands.
-// const PREVIEW_VIDEO: Asset = asset!("/assets/video/app-preview.mp4");
+const PREVIEW_VIDEO: Asset = asset!("/assets/video/demo.mp4");
 
 /// App preview section: a screen recording of the actual desktop app so
 /// visitors can see what Companion is before downloading it.
@@ -66,7 +66,7 @@ pub fn Preview() -> Element {
                         } else {
                             video {
                                 class: "aspect-video w-full bg-black/40",
-                                // src: PREVIEW_VIDEO,
+                                src: PREVIEW_VIDEO,
                                 controls: true,
                                 preload: "metadata",
                                 playsinline: true,
