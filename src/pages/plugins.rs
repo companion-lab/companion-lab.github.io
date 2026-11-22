@@ -84,7 +84,7 @@ pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
         id: "tts",
         repo: "companion-plugin-tts",
         name: "Speech Synthesis",
-        version: "0.3.2",
+        version: "0.3.3",
         description: "On-device TTS (Supertonic) + cloud synthesis, with a Speech Synthesis settings tab and the cloud TTS endpoint card.",
         icon: "fa-volume-high",
         color: "purple",
