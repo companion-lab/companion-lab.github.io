@@ -2,19 +2,23 @@ use dioxus::prelude::*;
 
 use crate::{
     components::{AmbientBackground, Footer},
-    config::COMMUNITY_GITHUB_URL,
+    config::GITHUB_URL,
+    plugin_catalog::{CATALOG_PERMISSIONS, PLUGIN_CATALOG},
     plugin_releases::{detect_platform, fetch_releases, PluginPlatform, PluginRelease, PluginZip},
     route::Route,
 };
 
-/// One plugin in the catalog, transcribed from its `manifest.json` (the
-/// `plugin-repos/*` checkouts). `frontend`/`backend` mirror whether the
-/// manifest declares the matching entry point.
+/// One plugin in the catalog. The data comes from the community plugin
+/// registry (companion-lab/plugin-registry) via the generated
+/// `src/plugin_catalog.rs`; this struct is just its Rust shape.
+/// `frontend`/`backend` mirror whether the plugin manifest declares the
+/// matching entry point.
 #[derive(Clone, PartialEq)]
 pub struct PluginEntry {
     pub id: &'static str,
-    /// GitHub repo name under the community org — the card links there.
-    /// Not derivable from `id` (see `companion-plugin-l2d`), so it is stored.
+    /// Full GitHub slug (`owner/name`) hosting the plugin's source and
+    /// releases — the card links there. Any public repo can register, not
+    /// just companion-lab's, so the owner is part of the value.
     pub repo: &'static str,
     pub name: &'static str,
     pub version: &'static str,
@@ -27,112 +31,6 @@ pub struct PluginEntry {
     pub frontend: bool,
     pub backend: bool,
 }
-
-/// The official plugin catalog, embedded at build time because the Pages
-/// deployment is a static client-only bundle — there is no server to fetch
-/// a registry from (same reason the docs markdown uses `include_str!`).
-pub static PLUGIN_CATALOG: [PluginEntry; 8] = [
-    PluginEntry {
-        id: "chat",
-        repo: "companion-plugin-chat",
-        name: "Chat",
-        version: "0.3.2",
-        description: "The avatar's AI conversation: provider chat with tool loop, streaming TTS/STT speech, wake word, clarifying questions, and the Persona/Connection settings sections.",
-        icon: "fa-comments",
-        color: "purple",
-        permissions: &["storage", "events", "tools", "secrets"],
-        frontend: true,
-        backend: false,
-    },
-    PluginEntry {
-        id: "vrm",
-        repo: "companion-plugin-vrm",
-        name: "VRM Avatar",
-        version: "0.3.2",
-        description: "VRM avatar models (with the built-in demo asset), motion and emotion clips, and graphics settings.",
-        icon: "fa-cube",
-        color: "blue",
-        permissions: &["storage", "events"],
-        frontend: true,
-        backend: true,
-    },
-    PluginEntry {
-        id: "companion-plugin-l2d",
-        repo: "companion-plugin-l2d",
-        name: "Live2D Avatar",
-        version: "0.3.2",
-        description: "Live2D avatar for the desktop overlay: renders the bundled Cubism model and answers the avatar bus (chat emotions, TTS lip sync, click-through).",
-        icon: "fa-masks-theater",
-        color: "indigo",
-        permissions: &["storage", "events", "tools"],
-        frontend: true,
-        backend: true,
-    },
-    PluginEntry {
-        id: "stt",
-        repo: "companion-plugin-stt",
-        name: "Speech Recognition",
-        version: "0.3.2",
-        description: "On-device STT (Moonshine) + cloud transcription, with a Speech Recognition settings tab and the cloud STT endpoint card.",
-        icon: "fa-microphone-lines",
-        color: "pink",
-        permissions: &["events", "secrets", "microphone"],
-        frontend: true,
-        backend: true,
-    },
-    PluginEntry {
-        id: "tts",
-        repo: "companion-plugin-tts",
-        name: "Speech Synthesis",
-        version: "0.3.3",
-        description: "On-device TTS (Supertonic) + cloud synthesis, with a Speech Synthesis settings tab and the cloud TTS endpoint card.",
-        icon: "fa-volume-high",
-        color: "purple",
-        permissions: &["events", "secrets"],
-        frontend: true,
-        backend: true,
-    },
-    PluginEntry {
-        id: "alarms",
-        repo: "companion-plugin-alarms",
-        name: "Alarms",
-        version: "0.3.2",
-        description: "Timed alarms and reminders: a settings tab, the ringing banner, and alarm tools the avatar can call.",
-        icon: "fa-bell",
-        color: "blue",
-        permissions: &["storage", "events", "tools"],
-        frontend: true,
-        backend: true,
-    },
-    PluginEntry {
-        id: "calendar",
-        repo: "companion-plugin-calendar",
-        name: "Calendar",
-        version: "0.3.2",
-        description: "Dated events, birthdays, and appointments: a settings tab, reminder banners, and calendar tools the avatar can call.",
-        icon: "fa-calendar-days",
-        color: "indigo",
-        permissions: &["storage", "events", "tools"],
-        frontend: true,
-        backend: true,
-    },
-    PluginEntry {
-        id: "mcp",
-        repo: "companion-plugin-mcp",
-        name: "MCP Tools",
-        version: "0.3.2",
-        description: "Model Context Protocol client: connect MCP servers and expose their tools to the avatar.",
-        icon: "fa-plug",
-        color: "pink",
-        permissions: &["storage", "events", "tools"],
-        frontend: true,
-        backend: true,
-    },
-];
-
-/// Every permission declared across the catalog, in chip order. Kept in sync
-/// with `PLUGIN_CATALOG` — a new permission needs a chip here to be filterable.
-static CATALOG_PERMISSIONS: [&str; 5] = ["storage", "events", "tools", "secrets", "microphone"];
 
 /// `/plugins` — searchable catalog of the official plugins.
 #[component]
@@ -412,7 +310,7 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
                 "p.{index}"
             }
             a {
-                href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}",
+                href: "{GITHUB_URL}/{plugin.repo}",
                 target: "_blank",
                 rel: "noopener noreferrer",
                 "aria-label": "View the {plugin.name} plugin repository on GitHub",
@@ -446,7 +344,7 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
                 div {
                     class: "flex items-center gap-3",
                     a {
-                        href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}",
+                        href: "{GITHUB_URL}/{plugin.repo}",
                         target: "_blank",
                         rel: "noopener noreferrer",
                         "aria-label": "View the {plugin.name} plugin repository on GitHub",
@@ -584,7 +482,7 @@ fn DownloadPanel(
 fn ReleasesFallbackLink(plugin: &'static PluginEntry) -> Element {
     rsx! {
         a {
-            href: "{COMMUNITY_GITHUB_URL}/{plugin.repo}/releases",
+            href: "{GITHUB_URL}/{plugin.repo}/releases",
             target: "_blank",
             rel: "noopener noreferrer",
             class: "flex items-center gap-1.5 font-mono text-[11px] text-gray-400 transition-colors hover:text-purple-300",

@@ -6,10 +6,13 @@ use std::path::Path;
 /// resolved with dotenv precedence: an exported shell variable wins, then the
 /// `.env` value, then the hardcoded default. The defaults also cover CI
 /// builds (GitHub Pages) that run without a `.env`.
-const SITE_LINKS: [(&str, &str); 6] = [
+const SITE_LINKS: [(&str, &str); 7] = [
     // The org all official repos live under (companion-vr, the previous
     // default, no longer exists).
     ("COMMUNITY_GITHUB_URL", "https://github.com/companion-lab"),
+    // Plain GitHub host — registered plugins may live under any owner, and
+    // their repo/release links are built as {GITHUB_URL}/{owner}/{repo}.
+    ("GITHUB_URL", "https://github.com"),
     ("DISCORD_URL", "https://discord.gg/G46H7B9x"),
     // Releases *page* of the app repo — the download buttons' fallback link.
     (
@@ -25,20 +28,17 @@ const SITE_LINKS: [(&str, &str); 6] = [
         "RELEASES_API_URL",
         "https://api.github.com/repos/companion-lab/companion-desktop/releases?per_page=25",
     ),
-    // Releases *API* base listing the official plugin repos — the plugins
-    // page appends `/{repo}/releases` per plugin card to resolve that
+    // Releases *API* base for the registered plugin repos — the plugins page
+    // appends `/{owner}/{repo}/releases` per plugin card to resolve that
     // plugin's published versions (see src/plugin_releases.rs).
-    (
-        "PLUGIN_RELEASES_API_URL",
-        "https://api.github.com/repos/companion-lab",
-    ),
+    ("PLUGIN_RELEASES_API_URL", "https://api.github.com/repos"),
     // CDN mirror of the same data, used as the plugin release fallback: the
     // GitHub API rate-limits unauthenticated visitors per IP, and jsDelivr's
     // data API serves each repo's version tags CORS-open without meaningful
     // limits (see src/plugin_releases.rs).
     (
         "PLUGIN_RELEASES_CDN_URL",
-        "https://data.jsdelivr.com/v1/packages/gh/companion-lab",
+        "https://data.jsdelivr.com/v1/packages/gh",
     ),
 ];
 

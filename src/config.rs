@@ -9,7 +9,7 @@
 //! This is compile-time (not `std::env::var`) because the navbar/footer
 //! render inside the wasm client, which has no runtime environment; baking
 //! the values keeps SSR and hydration consistent. `env!` cannot fail: the
-//! build script unconditionally emits all six.
+//! build script unconditionally emits all seven.
 //!
 //! These are public site links. Server-side secrets (DATABASE_URL etc.) are
 //! a different story — see `src/server/builds/storage.rs`, which reads them
@@ -17,6 +17,10 @@
 
 /// GitHub organization URL (navbar + footer icon buttons).
 pub const COMMUNITY_GITHUB_URL: &str = env!("COMMUNITY_GITHUB_URL");
+
+/// Plain GitHub host — the base for links into registered plugins' repos
+/// (`{GITHUB_URL}/{owner}/{repo}`), which may live under any owner.
+pub const GITHUB_URL: &str = env!("GITHUB_URL");
 
 /// Discord invite URL (navbar + footer icon buttons).
 pub const DISCORD_URL: &str = env!("DISCORD_URL");
@@ -32,14 +36,15 @@ pub const RELEASES_URL: &str = env!("RELEASES_URL");
 #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
 pub const RELEASES_API_URL: &str = env!("RELEASES_API_URL");
 
-/// GitHub Releases API base listing the official plugin repos, queried at
-/// runtime as `{base}/{repo}/releases` to resolve each plugin's published
-/// versions and zip assets (see src/plugin_releases.rs).
+/// GitHub Releases API base, queried at runtime as `{base}/{owner}/{repo}/releases`
+/// to resolve each registered plugin's published versions and zip assets —
+/// `repo` is the registry entry's full `owner/name` slug (see
+/// src/plugin_releases.rs).
 #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
 pub const PLUGIN_RELEASES_API_URL: &str = env!("PLUGIN_RELEASES_API_URL");
 
-/// jsDelivr data-API base mirroring the official plugin repos — the plugin
-/// release lookup's fallback when the GitHub API rate-limits the visitor's
-/// IP (see src/plugin_releases.rs).
+/// jsDelivr data-API base mirroring GitHub repos — the plugin release
+/// lookup's fallback when the GitHub API rate-limits the visitor's IP,
+/// queried as `{base}/{owner}/{repo}` (see src/plugin_releases.rs).
 #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
 pub const PLUGIN_RELEASES_CDN_URL: &str = env!("PLUGIN_RELEASES_CDN_URL");

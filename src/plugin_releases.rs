@@ -1,11 +1,12 @@
-//! Per-plugin download options, resolved from the plugin repos' GitHub
-//! releases.
+//! Per-plugin download options, resolved from the registered plugins' GitHub
+//! releases (the catalog comes from the community plugin registry — see
+//! src/plugin_catalog.rs).
 //!
-//! Every official plugin repo (`companion-plugin-<id>`) publishes installable
-//! zips on its GitHub releases when a `v*` tag is pushed: backend plugins get
-//! one zip per platform (`<id>-<version>-macos-arm64.zip`, …), frontend-only
-//! plugins a single universal zip (`<id>-<version>.zip`). The zips import
-//! into the Companion app via Settings → Plugins → Import plugin…
+//! Every registered plugin repo publishes installable zips on its GitHub
+//! releases when a `v*` tag is pushed: backend plugins get one zip per
+//! platform (`<id>-<version>-macos-arm64.zip`, …), frontend-only plugins a
+//! single universal zip (`<id>-<version>.zip`). The zips import into the
+//! Companion app via Settings → Plugins → Import plugin…
 //!
 //! The Pages deployment is a static client-only bundle, so — like
 //! [crate::latest_release] — the lookup runs in the wasm client. Unlike the
@@ -183,7 +184,8 @@ mod release_api {
 
 /// Query the GitHub Releases API for one plugin repo's published releases,
 /// newest first, mapping each zip asset to its platform by filename suffix.
-/// Unauthenticated request: api.github.com serves open CORS here.
+/// `repo` is the registry entry's full `owner/name` slug. Unauthenticated
+/// request: api.github.com serves open CORS here.
 #[cfg(target_arch = "wasm32")]
 async fn fetch_releases_via_api(repo: &str) -> Result<Vec<PluginRelease>, String> {
     let url = format!(
@@ -284,7 +286,7 @@ async fn fetch_releases_via_cdn(entry: &PluginEntry) -> Result<Vec<PluginRelease
 fn derived_zips(entry: &PluginEntry, version: &str, tag: &str) -> Vec<PluginZip> {
     let base = format!(
         "{}/{}/releases/download/{tag}/{}-{version}",
-        crate::config::COMMUNITY_GITHUB_URL,
+        crate::config::GITHUB_URL,
         entry.repo,
         entry.id
     );

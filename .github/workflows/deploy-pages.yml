@@ -12,9 +12,15 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # The plugin registry (companion-lab/plugin-registry) pings this after a
+  # registration PR merges, so a new plugin reaches the /plugins page in
+  # minutes instead of waiting for the daily rebuild below.
+  repository_dispatch:
+    types: [plugin-registry-updated]
   schedule:
     # Daily refresh: plugin releases happen in other repos and can't trigger
-    # this workflow, so the catalog chips are re-synced on a clock instead.
+    # this workflow, and a missed registry dispatch self-heals here — the
+    # catalog is re-synced from the registry on a clock instead.
     - cron: "17 6 * * *"
   workflow_dispatch:
 
@@ -35,24 +41,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Refresh the hardcoded version chips from the plugins' published
-      # releases before building (see scripts/sync-plugin-versions.mjs).
-      # Best-effort: lookup failures keep the committed versions, so this
-      # never breaks the deploy. Committed back with [skip ci] so the push
-      # doesn't retrigger this workflow (the run below already deploys).
-      - name: Sync plugin catalog versions from GitHub releases
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/sync-plugin-versions.mjs
+      # Refresh the embedded plugin catalog from the community registry
+      # (companion-lab/plugin-registry's plugins.json — see
+      # scripts/sync-registry.mjs). Best-effort: a registry fetch failure
+      # keeps the committed catalog, so this never breaks the deploy.
+      # Committed back with [skip ci] so the push doesn't retrigger this
+      # workflow (the run below already deploys).
+      - name: Sync plugin catalog from the registry
+        run: node scripts/sync-registry.mjs
 
       - name: Commit synced catalog
         run: |
-          if git diff --quiet src/pages/plugins.rs; then
+          if git diff --quiet src/plugin_catalog.rs; then
             echo "catalog unchanged"
           else
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git commit -am "[skip ci] chore: sync plugin catalog versions"
+            git commit -am "[skip ci] chore: sync plugin catalog from the registry"
             git push
           fi
 
@@ -81,16 +86,18 @@ jobs:
       # (gitignored, so it never reaches CI). Regenerate it here from
       # repository variables — public URLs, not secrets, so `vars.*` is fine.
       # Unset variables are skipped and build.rs falls back to its defaults.
+      # The plugin release API/CDN bases are deliberately absent: since the
+      # registry stores full owner/repo slugs, build.rs's suffix-less defaults
+      # are authoritative, and a stale org-prefixed repo variable must not
+      # override them.
       - name: Create .env from repository variables
         env:
           COMMUNITY_GITHUB_URL: ${{ vars.COMMUNITY_GITHUB_URL }}
           DISCORD_URL: ${{ vars.DISCORD_URL }}
           RELEASES_URL: ${{ vars.RELEASES_URL }}
-          PLUGIN_RELEASES_API_URL: ${{ vars.PLUGIN_RELEASES_API_URL }}
-          PLUGIN_RELEASES_CDN_URL: ${{ vars.PLUGIN_RELEASES_CDN_URL }}
         run: |
           : > .env
-          for key in COMMUNITY_GITHUB_URL DISCORD_URL RELEASES_URL PLUGIN_RELEASES_API_URL PLUGIN_RELEASES_CDN_URL; do
+          for key in COMMUNITY_GITHUB_URL DISCORD_URL RELEASES_URL; do
             value="${!key}"
             # `if` rather than `[ … ] && …` — under `bash -e`, an empty
             # variable would make the failed test the loop's exit status
