@@ -21,6 +21,10 @@ pub struct PluginEntry {
     /// just companion-lab's, so the owner is part of the value.
     pub repo: &'static str,
     pub name: &'static str,
+    /// The repo's latest published release, resolved by the registry (its
+    /// daily sync merges releases into versions.json; the catalog generator
+    /// reads it). Empty while the plugin has no release yet — the card
+    /// shows "unreleased" instead of a version chip.
     pub version: &'static str,
     pub description: &'static str,
     pub icon: &'static str,
@@ -323,7 +327,11 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
                     h3 { class: "text-base font-semibold text-white", "{plugin.name}" }
                     span {
                         class: "font-mono text-[10px] tracking-[0.2em] text-gray-500",
-                        "v{plugin.version}"
+                        if plugin.version.is_empty() {
+                            "unreleased"
+                        } else {
+                            "v{plugin.version}"
+                        }
                     }
                 }
             }

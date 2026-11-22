@@ -1,9 +1,11 @@
 //! The `/plugins` page's catalog, generated from the community plugin
-//! registry (companion-lab/plugin-registry's plugins.json) by
-//! scripts/sync-registry.mjs.
+//! registry (companion-lab/plugin-registry's plugins.json + versions.json)
+//! by scripts/sync-registry.mjs.
 //!
 //! DO NOT EDIT — edit the registry instead; the next Pages build embeds
 //! the fresh catalog (deploy-pages.yml runs the sync before building).
+//! `version` is the repo's latest published release resolved by the
+//! registry; "" means none yet (the card shows "unreleased").
 
 use crate::pages::PluginEntry;
 
