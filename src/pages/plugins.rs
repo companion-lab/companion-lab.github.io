@@ -262,8 +262,8 @@ enum ReleasesState {
 /// declared permissions as mono chips, and the shipped entry points. Indexes
 /// like a register (`p.01`), matching the feature cells' `f.01`. The header
 /// links to the plugin's repository (opened in a new tab); the download
-/// button opens a panel listing every published release's installable zips
-/// (see [DownloadPanel]).
+/// button opens a panel listing the newest published releases' installable
+/// zips (five at most, see [DownloadPanel]).
 #[component]
 fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
     let mut panel_open = use_signal(|| false);
@@ -385,10 +385,12 @@ fn PluginCard(plugin: &'static PluginEntry, index: String) -> Element {
     }
 }
 
-/// The version chooser below a card's footer: every published release of the
-/// plugin repo (newest first), each with its installable zips — one per
-/// platform for backend plugins, a single universal zip for frontend-only
-/// ones. The visitor's platform (when detected) sorts and highlights first.
+/// The version chooser below a card's footer: the plugin repo's newest
+/// releases (newest first, five at most — see
+/// [crate::plugin_releases::MAX_RELEASES]), each with its installable zips —
+/// one per platform for backend plugins, a single universal zip for
+/// frontend-only ones. The visitor's platform (when detected) sorts and
+/// highlights first.
 #[component]
 fn DownloadPanel(
     plugin: &'static PluginEntry,
@@ -456,9 +458,9 @@ fn DownloadPanel(
                         }
                         // The lookup may be the CDN fallback (whose zip URLs
                         // are derived and can dead-end on repos whose tags
-                        // were pushed without the release job) or simply be
-                        // missing older versions — keep the source of truth
-                        // one click away.
+                        // were pushed without the release job), and the list
+                        // is capped at the newest five either way — keep the
+                        // source of truth one click away.
                         div {
                             class: "mt-3",
                             ReleasesFallbackLink { plugin }

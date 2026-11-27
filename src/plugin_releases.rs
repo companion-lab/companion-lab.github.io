@@ -135,11 +135,20 @@ pub fn detect_platform() -> Option<PluginPlatform> {
     }
 }
 
-/// Query one plugin's published releases, newest first: the GitHub Releases
-/// API first, the jsDelivr mirror when the API rate-limits the visitor (see
-/// the module docs for the trade-offs).
+/// How many releases a download panel lists: the newest five only — older
+/// versions stay on the GitHub releases page, one click away (the panel's
+/// fallback link).
+pub const MAX_RELEASES: usize = 5;
+
+/// Query one plugin's published releases, newest first, capped at
+/// [MAX_RELEASES]: the GitHub Releases API first, the jsDelivr mirror when
+/// the API rate-limits the visitor (see the module docs for the trade-offs).
 pub async fn fetch_releases(entry: &PluginEntry) -> Result<Vec<PluginRelease>, String> {
-    fetch_impl(entry).await
+    // The CDN mirror serves every tag, so cap both sources here (the API
+    // path already pages at MAX_RELEASES — see `fetch_releases_via_api`).
+    let mut releases = fetch_impl(entry).await?;
+    releases.truncate(MAX_RELEASES);
+    Ok(releases)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -189,8 +198,9 @@ mod release_api {
 #[cfg(target_arch = "wasm32")]
 async fn fetch_releases_via_api(repo: &str) -> Result<Vec<PluginRelease>, String> {
     let url = format!(
-        "{}/{}/releases?per_page=25",
-        crate::config::PLUGIN_RELEASES_API_URL, repo
+        "{}/{}/releases?per_page={MAX_RELEASES}",
+        crate::config::PLUGIN_RELEASES_API_URL,
+        repo
     );
     let response = gloo_net::http::Request::get(&url)
         .header("Accept", "application/vnd.github+json")
